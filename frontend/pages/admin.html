@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin — LRI</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Panel de Administración</span>
+    </a>
+    <div class="navbar-links">
+      <a href="/index.html" class="nav-link">← Ver revista</a>
+    </div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-section">General</div>
+    <a href="#" class="sidebar-link active" onclick="irA('resumen', this)">📊 Resumen</a>
+
+    <div class="sidebar-section">Contenido</div>
+    <a href="#" class="sidebar-link" onclick="irA('pendientes', this)">⏳ Pendientes <span class="sidebar-badge" id="badge-pendientes">0</span></a>
+    <a href="#" class="sidebar-link" onclick="irA('articulos', this)">📄 Todos los artículos</a>
+
+    <div class="sidebar-section">Comunidad</div>
+    <a href="#" class="sidebar-link" onclick="irA('reportes', this)">⚑ Reportes <span class="sidebar-badge" id="badge-reportes" style="display:none">0</span></a>
+
+    <div id="sidebar-superadmin" style="display:none">
+      <div class="sidebar-section">Superadmin</div>
+      <a href="#" class="sidebar-link" onclick="irA('usuarios', this)">👥 Usuarios</a>
+      <a href="#" class="sidebar-link" onclick="irA('log', this)">📋 Log de acciones</a>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="admin-main">
+
+    <!-- Resumen -->
+    <div class="admin-page active" id="page-resumen">
+      <h2 style="margin-bottom:0.3rem">Panel de administración</h2>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto-2);margin-bottom:2rem">Bienvenido, <span id="admin-nombre" style="font-weight:600;color:var(--azul)"></span></p>
+      <div class="stats-grid" id="stats-grid">
+        <div class="spinner"></div>
+      </div>
+      <div style="background:var(--azul-claro);border:1.5px solid var(--borde);border-radius:12px;padding:1.5rem">
+        <h4 style="margin-bottom:0.5rem;color:var(--azul)">Acciones rápidas</h4>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:1rem">
+          <button class="btn btn-secondary btn-sm" onclick="irA('pendientes', null)">⏳ Ver artículos pendientes</button>
+          <button class="btn btn-ghost btn-sm" onclick="irA('reportes', null)">⚑ Ver reportes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="admin-page" id="page-pendientes">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-eyebrow">Zona Académica</span>
+          <h2>Artículos pendientes</h2>
+          <p class="section-desc">Revisa y aprueba o rechaza los artículos enviados.</p>
+        </div>
+      </div>
+      <div id="tabla-pendientes"></div>
+    </div>
+
+    <!-- Todos los artículos -->
+    <div class="admin-page" id="page-articulos">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-eyebrow">Contenido</span>
+          <h2>Todos los artículos</h2>
+        </div>
+      </div>
+      <div id="tabla-articulos"></div>
+    </div>
+
+    <!-- Reportes -->
+    <div class="admin-page" id="page-reportes">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-eyebrow">Comunidad</span>
+          <h2>Reportes de usuarios</h2>
+        </div>
+        <div>
+          <label style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto-2);display:flex;align-items:center;gap:0.5rem">
+            <input type="checkbox" id="solo-nuevos" checked onchange="cargarReportes()">
+            Solo sin revisar
+          </label>
+        </div>
+      </div>
+      <div id="tabla-reportes"></div>
+    </div>
+
+    <!-- Usuarios (superadmin) -->
+    <div class="admin-page" id="page-usuarios">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-eyebrow">Superadmin</span>
+          <h2>Gestión de usuarios</h2>
+          <p class="section-desc">Asigna o quita permisos de administrador.</p>
+        </div>
+      </div>
+      <div id="tabla-usuarios"></div>
+    </div>
+
+    <!-- Log -->
+    <div class="admin-page" id="page-log">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-eyebrow">Superadmin</span>
+          <h2>Log de acciones</h2>
+        </div>
+      </div>
+      <div id="tabla-log"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal notas -->
+<div class="modal-overlay" id="modal-nota">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-nota-titulo">Acción</h3>
+      <button class="modal-close" onclick="cerrarNota()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nota (opcional)</label>
+        <textarea class="form-input" id="nota-texto" placeholder="Agrega una nota sobre esta decisión..." style="min-height:100px"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%" id="btn-confirmar-accion">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/auth-modal.js"></script>
+<script>
+  // Verificar acceso
+  if (!estaLogueado() || !esAdmin()) {
+    window.location.href = '/index.html';
+  }
+
+  renderNavbar();
+  const usuario = getUsuario();
+  if (usuario) {
+    document.getElementById('admin-nombre').textContent = usuario.nombre;
+    if (esSuperadmin()) document.getElementById('sidebar-superadmin').style.display = 'block';
+  }
+
+  let accionPendiente = null;
+
+  function irA(pagina, link) {
+    document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.getElementById(`page-${pagina}`).classList.add('active');
+    if (link) link.classList.add('active');
+    if (pagina === 'resumen') cargarResumen();
+    if (pagina === 'pendientes') cargarPendientes();
+    if (pagina === 'articulos') cargarTodosArticulos();
+    if (pagina === 'reportes') cargarReportes();
+    if (pagina === 'usuarios') cargarUsuarios();
+    if (pagina === 'log') cargarLog();
+  }
+
+  async function cargarResumen() {
+    try {
+      const data = await apiFetch('/admin/resumen');
+      document.getElementById('badge-pendientes').textContent = data.articulos_pendientes;
+      if (data.reportes_sin_revisar > 0) {
+        const b = document.getElementById('badge-reportes');
+        b.style.display = 'inline'; b.textContent = data.reportes_sin_revisar;
+      }
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Artículos publicados</div><div class="stat-value">${data.articulos_publicados}</div></div>
+        <div class="stat-card oro"><div class="stat-label">Pendientes de revisión</div><div class="stat-value">${data.articulos_pendientes}</div></div>
+        <div class="stat-card"><div class="stat-label">Reportes nuevos</div><div class="stat-value" style="color:#c0392b">${data.reportes_sin_revisar}</div></div>
+        <div class="stat-card verde"><div class="stat-label">Usuarios activos</div><div class="stat-value">${data.usuarios_activos}</div></div>
+      `;
+    } catch(e) { toast('Error al cargar resumen', 'error'); }
+  }
+
+  async function cargarPendientes() {
+    const cont = document.getElementById('tabla-pendientes');
+    cont.innerHTML = '<div class="spinner"></div>';
+    try {
+      const arts = await apiFetch('/admin/articulos/pendientes');
+      if (!arts.length) { cont.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><h3>¡Todo al día!</h3><p>No hay artículos pendientes.</p></div>'; return; }
+      cont.innerHTML = `<table class="tabla-admin">
+        <thead><tr><th>Título</th><th>Autor</th><th>Fecha</th><th>Tipo</th><th>Acciones</th></tr></thead>
+        <tbody>${arts.map(a => `
+          <tr>
+            <td><a href="/pages/articulo.html?id=${a.id}" target="_blank" style="color:var(--azul);font-weight:500">${a.titulo}</a></td>
+            <td>${a.autor.nombre}</td>
+            <td style="color:var(--texto-3);font-size:0.82rem">${fechaLegible(a.creado_en)}</td>
+            <td><span class="badge ${a.tipo_contenido === 'archivo' ? 'badge-academico' : 'badge-libre'}">${a.tipo_contenido === 'archivo' ? '📎 Archivo' : '✏️ Editor'}</span></td>
+            <td><div class="acciones-row">
+              <button class="btn btn-sm" style="background:var(--verde);color:#fff" onclick="accion(${a.id},'aprobar','Aprobar artículo')">✓ Aprobar</button>
+              <button class="btn btn-sm btn-danger" onclick="accion(${a.id},'rechazar','Rechazar artículo')">✕ Rechazar</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { cont.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  async function cargarTodosArticulos() {
+    const cont = document.getElementById('tabla-articulos');
+    cont.innerHTML = '<div class="spinner"></div>';
+    try {
+      const arts = await apiFetch('/admin/articulos/todos');
+      if (!arts.length) { cont.innerHTML = '<div class="empty-state"><p>No hay artículos.</p></div>'; return; }
+      cont.innerHTML = `<table class="tabla-admin">
+        <thead><tr><th>Título</th><th>Autor</th><th>Zona</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody>${arts.map(a => `
+          <tr>
+            <td><a href="/pages/articulo.html?id=${a.id}" target="_blank" style="color:var(--azul);font-weight:500">${a.titulo}</a></td>
+            <td style="font-size:0.85rem">${a.autor.nombre}</td>
+            <td><span class="badge badge-${a.zona}">${a.zona === 'academico' ? 'Académico' : 'Libre'}</span></td>
+            <td><span class="badge badge-${a.estado === 'aprobado' ? 'libre' : a.estado === 'pendiente' ? 'pendiente' : 'rechazado'}">${a.estado}</span></td>
+            <td style="color:var(--texto-3);font-size:0.82rem">${fechaLegible(a.creado_en)}</td>
+            <td><div class="acciones-row">
+              ${a.estado === 'aprobado' ? `<button class="btn btn-sm btn-danger" onclick="accion(${a.id},'eliminar','Eliminar artículo')">Eliminar</button>` : ''}
+              ${a.estado === 'pendiente' ? `<button class="btn btn-sm" style="background:var(--verde);color:#fff" onclick="accion(${a.id},'aprobar','Aprobar')">Aprobar</button>` : ''}
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { cont.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  async function cargarReportes() {
+    const cont = document.getElementById('tabla-reportes');
+    const soloNuevos = document.getElementById('solo-nuevos').checked;
+    cont.innerHTML = '<div class="spinner"></div>';
+    try {
+      const reps = await apiFetch(`/admin/reportes?solo_sin_revisar=${soloNuevos}`);
+      if (!reps.length) { cont.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><h3>Sin reportes nuevos</h3></div>'; return; }
+      cont.innerHTML = `<table class="tabla-admin">
+        <thead><tr><th>Artículo</th><th>Reportado por</th><th>Razón</th><th>Descripción</th><th>Fecha</th><th>Acción</th></tr></thead>
+        <tbody>${reps.map(r => `
+          <tr>
+            <td><a href="/pages/articulo.html?id=${r.articulo_id}" target="_blank" style="color:var(--azul)">Ver artículo #${r.articulo_id}</a></td>
+            <td style="font-size:0.85rem">${r.nombre_reportador}<br><span style="color:var(--texto-3);font-size:0.78rem">${r.email_reportador}</span></td>
+            <td><span class="badge badge-pendiente">${r.razon.replace('_',' ')}</span></td>
+            <td style="font-size:0.85rem;color:var(--texto-2);max-width:200px">${r.descripcion || '—'}</td>
+            <td style="color:var(--texto-3);font-size:0.82rem">${fechaLegible(r.creado_en)}</td>
+            <td>${!r.revisado ? `<button class="btn btn-ghost btn-sm" onclick="marcarRevisado(${r.id})">✓ Revisado</button>` : '<span style="color:var(--texto-3);font-size:0.82rem">Revisado</span>'}</td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { cont.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  async function cargarUsuarios() {
+    const cont = document.getElementById('tabla-usuarios');
+    cont.innerHTML = '<div class="spinner"></div>';
+    try {
+      const users = await apiFetch('/admin/usuarios');
+      cont.innerHTML = `<table class="tabla-admin">
+        <thead><tr><th>Nombre</th><th>Email</th><th>Carrera</th><th>Rol</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody>${users.map(u => `
+          <tr>
+            <td style="font-weight:500">${u.nombre}</td>
+            <td style="font-size:0.85rem;color:var(--texto-2)">${u.email}</td>
+            <td style="font-size:0.85rem;color:var(--texto-2)">${u.carrera || '—'}</td>
+            <td><span class="badge ${u.rol === 'superadmin' ? 'badge-pendiente' : u.rol === 'admin' ? 'badge-academico' : 'badge-libre'}">${u.rol}</span></td>
+            <td style="color:var(--texto-3);font-size:0.82rem">${fechaLegible(u.creado_en)}</td>
+            <td><div class="acciones-row">
+              ${u.rol === 'superadmin' ? '' : u.rol === 'admin'
+                ? `<button class="btn btn-sm btn-outline" onclick="cambiarRol(${u.id},'estudiante','${u.nombre}')">Quitar admin</button>`
+                : `<button class="btn btn-sm btn-ghost" onclick="cambiarRol(${u.id},'admin','${u.nombre}')">+ Admin</button>
+                   <button class="btn btn-sm btn-danger" onclick="banearUsuario(${u.id},'${u.nombre}')">Banear</button>`}
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { cont.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  async function cargarLog() {
+    const cont = document.getElementById('tabla-log');
+    cont.innerHTML = '<div class="spinner"></div>';
+    try {
+      const log = await apiFetch('/admin/log');
+      if (!log.length) { cont.innerHTML = '<div class="empty-state"><p>Sin acciones registradas.</p></div>'; return; }
+      cont.innerHTML = `<table class="tabla-admin">
+        <thead><tr><th>Admin</th><th>Acción</th><th>Artículo</th><th>Nota</th><th>Fecha</th></tr></thead>
+        <tbody>${log.map(l => `
+          <tr>
+            <td style="font-weight:500">${l.admin}</td>
+            <td><span class="badge badge-academico">${l.tipo_accion}</span></td>
+            <td style="color:var(--texto-2)">${l.articulo_id ? `#${l.articulo_id}` : '—'}</td>
+            <td style="font-size:0.85rem;color:var(--texto-2)">${l.nota || '—'}</td>
+            <td style="color:var(--texto-3);font-size:0.82rem">${fechaLegible(l.fecha)}</td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { cont.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  function accion(id, tipo, titulo) {
+    accionPendiente = { id, tipo };
+    document.getElementById('modal-nota-titulo').textContent = titulo;
+    document.getElementById('nota-texto').value = '';
+    document.getElementById('modal-nota').classList.add('open');
+    document.getElementById('btn-confirmar-accion').onclick = ejecutarAccion;
+  }
+
+  async function ejecutarAccion() {
+    if (!accionPendiente) return;
+    const { id, tipo } = accionPendiente;
+    const nota = document.getElementById('nota-texto').value;
+    try {
+      await apiFetch(`/admin/articulos/${id}/${tipo}`, { method: 'POST', body: JSON.stringify({ tipo_accion: tipo, nota: nota || null }) });
+      cerrarNota();
+      toast(`Artículo ${tipo === 'aprobar' ? 'aprobado' : tipo === 'rechazar' ? 'rechazado' : 'eliminado'} correctamente`, 'success');
+      cargarPendientes(); cargarResumen();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function marcarRevisado(id) {
+    try {
+      await apiFetch(`/admin/reportes/${id}/revisar`, { method: 'POST' });
+      toast('Reporte marcado como revisado', 'success');
+      cargarReportes(); cargarResumen();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function cambiarRol(usuarioId, nuevoRol, nombre) {
+    if (!confirm(`¿${nuevoRol === 'admin' ? 'Dar permisos de admin' : 'Quitar permisos de admin'} a ${nombre}?`)) return;
+    try {
+      await apiFetch('/admin/usuarios/cambiar-rol', { method: 'POST', body: JSON.stringify({ usuario_id: usuarioId, nuevo_rol: nuevoRol }) });
+      toast(`Rol actualizado correctamente`, 'success');
+      cargarUsuarios();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function banearUsuario(usuarioId, nombre) {
+    if (!confirm(`¿Banear a ${nombre}? No podrá iniciar sesión.`)) return;
+    try {
+      await apiFetch(`/admin/usuarios/${usuarioId}/banear`, { method: 'POST' });
+      toast(`Usuario baneado`, 'success');
+      cargarUsuarios();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function cerrarNota() {
+    document.getElementById('modal-nota').classList.remove('open');
+    accionPendiente = null;
+  }
+
+  cargarResumen();
+</script>
+</body>
+</html>

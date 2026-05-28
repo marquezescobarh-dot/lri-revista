@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publicar artículo — LRI</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <style>
+    .ql-toolbar.ql-snow { border: 1.5px solid var(--borde); border-bottom: none; border-radius: 10px 10px 0 0; background: var(--superficie); font-family: 'DM Sans', sans-serif; padding: 0.6rem; }
+    .ql-container.ql-snow { border: 1.5px solid var(--borde); border-radius: 0 0 10px 10px; font-family: 'Lora', serif; font-size: 1rem; min-height: 400px; background: var(--blanco); }
+    .ql-editor { min-height: 380px; line-height: 1.8; color: var(--texto); padding: 1.5rem; }
+    .ql-editor.ql-blank::before { color: var(--texto-3); font-style: italic; }
+    .ql-snow .ql-picker { color: var(--texto-2); }
+    .ql-snow .ql-stroke { stroke: var(--texto-2); }
+    .ql-snow .ql-fill { fill: var(--texto-2); }
+    .ql-snow.ql-toolbar button:hover .ql-stroke, .ql-snow .ql-toolbar button:hover .ql-stroke { stroke: var(--azul); }
+    .file-drop-zone { border: 2px dashed var(--borde); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--superficie); }
+    .file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--azul); background: var(--azul-claro); }
+    .file-item { display: flex; align-items: center; gap: 0.8rem; background: var(--superficie); border: 1.5px solid var(--borde); border-radius: 8px; padding: 0.7rem 1rem; margin-top: 0.6rem; }
+    .file-item-icon { font-size: 1.4rem; }
+    .file-item-name { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; color: var(--texto); flex: 1; }
+    .file-item-size { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--texto-3); }
+    .file-item-remove { color: var(--texto-3); cursor: pointer; font-size: 1rem; transition: color 0.2s; background: none; border: none; }
+    .file-item-remove:hover { color: #c0392b; }
+    .tipo-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.9rem 1.4rem; border: 2px solid var(--borde); border-radius: 10px; cursor: pointer; transition: all 0.2s; background: var(--blanco); flex: 1; }
+    .tipo-btn:hover { border-color: var(--azul); }
+    .tipo-btn.active { border-color: var(--azul); background: var(--azul-claro); }
+    .tipo-btn-icon { font-size: 1.5rem; }
+    .tipo-btn-info { text-align: left; }
+    .tipo-btn-title { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--texto); }
+    .tipo-btn-desc { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--texto-2); margin-top: 0.1rem; }
+    .zona-card { border: 2px solid var(--borde); border-radius: 12px; padding: 1.2rem 1.5rem; cursor: pointer; transition: all 0.2s; }
+    .zona-card:hover { border-color: var(--azul); }
+    .zona-card.active-academico { border-color: var(--azul); background: var(--azul-claro); }
+    .zona-card.active-libre { border-color: var(--verde); background: var(--verde-claro); }
+    .ia-panel { background: linear-gradient(135deg, var(--azul-claro), #fff); border: 1.5px solid var(--azul); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; display: none; }
+    .ia-puntuacion { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--azul); }
+    .verificacion-banner { background: var(--oro-claro); border: 1.5px solid var(--oro); border-radius: 10px; padding: 1rem 1.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: #6b4c00; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Facultad de Economía · UNAM</span>
+    </a>
+    <div class="navbar-links"><a href="/index.html" class="nav-link">← Volver</a></div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<div style="background:var(--azul);padding:3rem 2rem 2.5rem">
+  <div style="max-width:900px;margin:0 auto">
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--oro);margin-bottom:0.8rem" id="page-subtitle">Nueva publicación</p>
+    <h1 style="color:#fff;font-size:2rem" id="page-title">Publica en LRI</h1>
+  </div>
+</div>
+
+<!-- Sin login -->
+<div id="necesita-login" style="display:none">
+  <div class="empty-state" style="padding:5rem 2rem">
+    <div class="empty-icon">🔒</div>
+    <h3>Necesitas iniciar sesión</h3>
+    <p>Para publicar en LRI debes tener una cuenta.</p>
+    <button onclick="abrirModal('login')" class="btn btn-secondary" style="margin-top:1.5rem">Iniciar sesión</button>
+  </div>
+</div>
+
+<!-- Formulario -->
+<div id="form-publicar" style="display:none">
+  <div style="max-width:900px;margin:0 auto;padding:3rem 2rem">
+
+    <!-- Banner verificación -->
+    <div id="banner-verificacion" class="verificacion-banner" style="display:none">
+      ⚠️ Tu email no está verificado. Para publicar en la zona académica necesitas verificarlo.
+      <button onclick="mostrarVerificacion()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline;margin-left:auto">Verificar ahora</button>
+    </div>
+
+    <!-- ZONA -->
+    <div style="margin-bottom:2.5rem">
+      <p class="form-label" style="margin-bottom:1rem">ZONA DE PUBLICACIÓN</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="zona-card active-academico" id="zona-academico" onclick="seleccionarZona('academico')">
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--azul);margin-bottom:0.4rem">📚 Zona Académica</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--azul)">Tu artículo será revisado por el equipo editorial antes de publicarse.</div>
+        </div>
+        <div class="zona-card" id="zona-libre" onclick="seleccionarZona('libre')">
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--verde);margin-bottom:0.4rem">🗣️ Libre Expresión</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--texto-2)">Publicación inmediata. Sin revisión previa.</div>
+        </div>
+      </div>
+      <input type="hidden" id="zona-seleccionada" value="academico">
+    </div>
+
+    <!-- INFO BÁSICA -->
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
+      <h3 style="margin-bottom:1.5rem;font-size:1.1rem">Información del artículo</h3>
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" class="form-input" id="pub-titulo" placeholder="Un título claro y descriptivo" oninput="mostrarBtnIA()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Resumen</label>
+        <textarea class="form-input" id="pub-resumen" placeholder="Describe brevemente de qué trata tu artículo..." style="min-height:80px"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Sección temática</label>
+          <select class="form-input" id="pub-seccion">
+            <option value="">Selecciona una sección</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Etiquetas</label>
+          <input type="text" class="form-input" id="pub-tags" placeholder="macro, política fiscal, UNAM">
+          <p class="form-hint">Separa con comas</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Organización (si aplica)</label>
+        <div style="display:flex;gap:0.6rem">
+          <select class="form-input" id="pub-org" style="flex:1"></select>
+        </div>
+        <p class="form-hint">Si tu artículo es de una organización estudiantil</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Imagen de portada (opcional)</label>
+        <input type="file" class="form-input" id="pub-imagen" accept=".jpg,.jpeg,.png,.webp">
+        <p class="form-hint">JPG, PNG o WEBP · Recomendado 1200×630px</p>
+      </div>
+    </div>
+
+    <!-- TIPO DE CONTENIDO -->
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
+      <h3 style="margin-bottom:0.5rem;font-size:1.1rem">Contenido del artículo</h3>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto-2);margin-bottom:1.5rem">¿Cómo quieres compartir tu trabajo?</p>
+      <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
+        <div class="tipo-btn active" id="tipo-editor-btn" onclick="cambiarTipo('editor')">
+          <span class="tipo-btn-icon">✏️</span>
+          <div class="tipo-btn-info">
+            <div class="tipo-btn-title">Escribir aquí</div>
+            <div class="tipo-btn-desc">Editor de texto completo con imágenes</div>
+          </div>
+        </div>
+        <div class="tipo-btn" id="tipo-archivo-btn" onclick="cambiarTipo('archivo')">
+          <span class="tipo-btn-icon">📎</span>
+          <div class="tipo-btn-info">
+            <div class="tipo-btn-title">Subir PDF o Word</div>
+            <div class="tipo-btn-desc">Sube tu documento ya terminado</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Quill -->
+      <div id="seccion-editor">
+        <div id="quill-editor" style="border-radius:10px"></div>
+      </div>
+
+      <!-- Subir archivo -->
+      <div id="seccion-archivo" style="display:none">
+        <div class="file-drop-zone" id="doc-drop" onclick="document.getElementById('doc-input').click()"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event,'doc')">
+          <div style="font-size:2.5rem;margin-bottom:0.8rem">📄</div>
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto-2)"><strong style="color:var(--azul)">Haz clic</strong> o arrastra tu documento aquí</p>
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--texto-3);margin-top:0.4rem">PDF o Word (.docx) · Máximo 10MB</p>
+        </div>
+        <input type="file" id="doc-input" accept=".pdf,.docx" style="display:none" onchange="agregarArchivo(this,'doc')">
+        <div id="doc-preview"></div>
+      </div>
+    </div>
+
+    <!-- ARCHIVOS EXTRA -->
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
+      <h3 style="margin-bottom:0.5rem;font-size:1.1rem">Archivos adicionales</h3>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto-2);margin-bottom:1.2rem">Adjunta bases de datos, tablas Excel, gráficas u otros recursos. <strong>Solo usuarios registrados podrán descargarlos.</strong></p>
+      <div class="file-drop-zone" id="extra-drop" onclick="document.getElementById('extra-input').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event,'extra')">
+        <div style="font-size:2rem;margin-bottom:0.6rem">📊</div>
+        <p style="font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto-2)"><strong style="color:var(--azul)">Agregar archivos</strong> adicionales</p>
+        <p style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--texto-3);margin-top:0.3rem">Excel (.xlsx), PDF, Word, CSV · Puedes subir varios</p>
+      </div>
+      <input type="file" id="extra-input" accept=".xlsx,.xls,.pdf,.docx,.csv" multiple style="display:none" onchange="agregarArchivos(this)">
+      <div id="extra-preview"></div>
+    </div>
+
+    <!-- Panel IA -->
+    </div>
+      <div id="ia-resultado" style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto);line-height:1.8;white-space:pre-wrap"></div>
+    </div>
+
+    <div id="pub-error" class="form-error" style="display:none;margin-bottom:1rem"></div>
+
+    <div style="display:flex;gap:1rem;justify-content:flex-end;flex-wrap:wrap;align-items:center">
+      <a href="/index.html" class="btn btn-outline">Cancelar</a>
+      
+      <button class="btn btn-primary btn-lg" onclick="publicarArticulo()" id="btn-publicar">Enviar artículo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal verificación -->
+<div class="modal-overlay" id="modal-verificacion">
+  <div class="modal">
+    <div class="modal-header" style="background:var(--oro)">
+      <h3>Verifica tu email</h3>
+      <button class="modal-close" onclick="cerrarVerificacion()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto-2);margin-bottom:1.5rem">
+        Ingresa el código de 6 dígitos que enviamos a tu correo. <br>
+        <span style="font-size:0.78rem;color:var(--texto-3)">(En modo desarrollo revisa la terminal del backend)</span>
+      </p>
+      <div class="form-group">
+        <label class="form-label">Código de verificación</label>
+        <input type="text" class="form-input" id="codigo-ver" placeholder="123456" maxlength="6" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace">
+      </div>
+      <div id="ver-error" class="form-error" style="display:none"></div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:0.8rem" onclick="verificarEmail()">Verificar</button>
+      <button onclick="reenviarCodigo()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline;display:block;text-align:center;width:100%">Reenviar código</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Auth -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <div class="modal-header"><h3>Acceder a LRI</h3><button class="modal-close" onclick="cerrarModal()">×</button></div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="cambiarTab('login')">Iniciar sesión</button>
+        <button class="modal-tab" data-tab="registro" onclick="cambiarTab('registro')">Registrarse</button>
+      </div>
+      <div class="modal-form" id="form-login">
+        <div class="form-group"><label class="form-label">Correo</label><input type="email" class="form-input" id="login-email" placeholder="tucorreo@ejemplo.com"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input type="password" class="form-input" id="login-pass" placeholder="••••••••"></div>
+        <div id="login-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-secondary" style="width:100%" onclick="hacerLogin()">Iniciar sesión</button>
+      </div>
+      <div class="modal-form" id="form-registro" style="display:none">
+        <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input" id="reg-nombre" placeholder="Tu nombre completo"></div>
+        <div class="form-group"><label class="form-label">Correo</label><input type="email" class="form-input" id="reg-email" placeholder="tucorreo@ejemplo.com"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input type="password" class="form-input" id="reg-pass" placeholder="Mínimo 8 caracteres"></div>
+        <div id="reg-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="hacerRegistro()">Crear cuenta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth-modal.js"></script>
+<script>
+  renderNavbar();
+  const params = new URLSearchParams(window.location.search);
+  const modoEdicion = params.get('editar');
+  let quill, tipoContenido = 'editor';
+  let archivosExtra = [];
+  let archivoDoc = null;
+
+  // Verificar login
+  if (!estaLogueado()) {
+    document.getElementById('necesita-login').style.display = 'block';
+  } else {
+    document.getElementById('form-publicar').style.display = 'block';
+    iniciarEditor();
+    cargarSecciones();
+    cargarOrganizaciones();
+    verificarEmailStatus();
+    if (modoEdicion) cargarArticuloEditar(modoEdicion);
+    if (params.get('zona') === 'libre') seleccionarZona('libre');
+  }
+
+  function iniciarEditor() {
+    quill = new Quill('#quill-editor', {
+      theme: 'snow',
+      placeholder: 'Escribe tu artículo aquí. Puedes pegar imágenes, agregar tablas, gráficas...',
+      modules: {
+        toolbar: {
+          container: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'align': [] }],
+            ['blockquote', 'code-block'],
+            ['link', 'image'],
+            ['clean']
+          ],
+          handlers: { image: subirImagenEditor }
+        }
+      }
+    });
+  }
+
+  async function subirImagenEditor() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append('imagen', file);
+      try {
+        const token = getToken();
+        const res = await fetch(`${API}/articulos/imagen-editor`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+        const data = await res.json();
+        const range = quill.getSelection();
+        quill.insertEmbed(range.index, 'image', `http://localhost:8000${data.url}`);
+      } catch(e) { toast('Error al subir imagen', 'error'); }
+    };
+  }
+
+  async function cargarSecciones() {
+    try {
+      const data = await apiFetch('/buscar/secciones');
+      const sel = document.getElementById('pub-seccion');
+      data.secciones.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        sel.appendChild(opt);
+      });
+    } catch(e) {}
+  }
+
+  async function cargarOrganizaciones() {
+    try {
+      const orgs = await apiFetch('/organizaciones/');
+      const sel = document.getElementById('pub-org');
+      sel.innerHTML = '<option value="">Sin organización</option>';
+      orgs.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.id; opt.textContent = o.nombre;
+        sel.appendChild(opt);
+      });
+      // Pre-seleccionar la del usuario
+      const u = getUsuario();
+      if (u && u.organizacion) sel.value = u.organizacion.id;
+    } catch(e) {}
+  }
+
+  function verificarEmailStatus() {
+    const u = getUsuario();
+    if (u && !u.email_verificado) {
+      document.getElementById('banner-verificacion').style.display = 'flex';
+    }
+  }
+
+  function seleccionarZona(zona) {
+    document.getElementById('zona-seleccionada').value = zona;
+    document.getElementById('zona-academico').className = 'zona-card' + (zona === 'academico' ? ' active-academico' : '');
+    document.getElementById('zona-libre').className = 'zona-card' + (zona === 'libre' ? ' active-libre' : '');
+    document.getElementById('btn-publicar').textContent = zona === 'libre' ? 'Publicar ahora →' : 'Enviar para revisión →';
+  }
+
+  function cambiarTipo(tipo) {
+    tipoContenido = tipo;
+    document.getElementById('seccion-editor').style.display = tipo === 'editor' ? 'block' : 'none';
+    document.getElementById('seccion-archivo').style.display = tipo === 'archivo' ? 'block' : 'none';
+    document.getElementById('tipo-editor-btn').className = 'tipo-btn' + (tipo === 'editor' ? ' active' : '');
+    document.getElementById('tipo-archivo-btn').className = 'tipo-btn' + (tipo === 'archivo' ? ' active' : '');
+  }
+
+  function handleDrop(event, tipo) {
+    event.preventDefault();
+    document.getElementById(`${tipo}-drop`).classList.remove('dragover');
+    const files = event.dataTransfer.files;
+    if (tipo === 'doc' && files[0]) agregarArchivoManual(files[0], 'doc');
+    else if (tipo === 'extra') Array.from(files).forEach(f => agregarArchivoManual(f, 'extra'));
+  }
+
+  function agregarArchivo(input, tipo) {
+    if (input.files[0]) agregarArchivoManual(input.files[0], tipo);
+  }
+
+  function agregarArchivos(input) {
+    Array.from(input.files).forEach(f => agregarArchivoManual(f, 'extra'));
+  }
+
+  const iconos = { pdf: '📄', docx: '📝', xlsx: '📊', xls: '📊', csv: '📊', imagen: '🖼️' };
+
+  function agregarArchivoManual(file, tipo) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const icon = iconos[ext] || '📁';
+    const kb = (file.size / 1024).toFixed(0);
+    if (tipo === 'doc') {
+      archivoDoc = file;
+      document.getElementById('doc-preview').innerHTML = `
+        <div class="file-item">
+          <span class="file-item-icon">${icon}</span>
+          <span class="file-item-name">${file.name}</span>
+          <span class="file-item-size">${kb} KB</span>
+          <button class="file-item-remove" onclick="archivoDoc=null;document.getElementById('doc-preview').innerHTML='';document.getElementById('doc-drop').style.display='block'">✕</button>
+        </div>`;
+      document.getElementById('doc-drop').style.display = 'none';
+    } else {
+      archivosExtra.push(file);
+      const prev = document.getElementById('extra-preview');
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.id = `extra-${archivosExtra.length - 1}`;
+      div.innerHTML = `<span class="file-item-icon">${icon}</span><span class="file-item-name">${file.name}</span><span class="file-item-size">${kb} KB</span><button class="file-item-remove" onclick="quitarExtra(${archivosExtra.length - 1})">✕</button>`;
+      prev.appendChild(div);
+    }
+  }
+
+  function quitarExtra(idx) {
+    archivosExtra[idx] = null;
+    const el = document.getElementById(`extra-${idx}`);
+    if (el) el.remove();
+  }
+
+  function mostrarBtnIA() {
+    const titulo = document.getElementById('pub-titulo').value.trim();
+    document.getElementById('btn-ia').style.display = titulo && estaLogueado() ? 'inline-flex' : 'none';
+  }
+
+  
+
+  async function publicarArticulo() {
+    const errEl = document.getElementById('pub-error');
+    errEl.style.display = 'none';
+    const titulo = document.getElementById('pub-titulo').value.trim();
+    if (!titulo) { errEl.textContent = 'El título es obligatorio'; errEl.style.display = 'block'; return; }
+    const zona = document.getElementById('zona-seleccionada').value;
+    const btn = document.getElementById('btn-publicar');
+    btn.textContent = 'Publicando...'; btn.disabled = true;
+
+    try {
+      const fd = new FormData();
+      fd.append('titulo', titulo);
+      fd.append('zona', zona);
+      fd.append('resumen', document.getElementById('pub-resumen').value || '');
+      fd.append('tags', document.getElementById('pub-tags').value || '');
+      fd.append('seccion', document.getElementById('pub-seccion').value || '');
+      const imgFile = document.getElementById('pub-imagen').files[0];
+      if (imgFile) fd.append('imagen_portada', imgFile);
+      archivosExtra.filter(Boolean).forEach(f => fd.append('archivos_extra', f));
+
+      let endpoint;
+      if (tipoContenido === 'editor') {
+        const html = quill.root.innerHTML;
+        if (quill.getText().trim().length < 20) throw new Error('El contenido es muy corto');
+        fd.append('contenido_html', html);
+        endpoint = '/articulos/editor';
+      } else {
+        if (!archivoDoc) throw new Error('Selecciona un archivo PDF o Word');
+        fd.append('archivo', archivoDoc);
+        endpoint = '/articulos/subir-archivo';
+      }
+
+      if (modoEdicion) {
+        fd.append('_method', 'PUT');
+        await apiFetchForm(`/articulos/${modoEdicion}`, fd, 'PUT');
+        toast('Artículo actualizado correctamente', 'success');
+      } else {
+        await apiFetchForm(endpoint, fd);
+        toast(zona === 'libre' ? '¡Artículo publicado!' : '¡Enviado para revisión!', 'success');
+      }
+      setTimeout(() => window.location.href = '/index.html', 2000);
+    } catch(e) {
+      errEl.textContent = e.message; errEl.style.display = 'block';
+      btn.textContent = 'Enviar artículo →'; btn.disabled = false;
+    }
+  }
+
+  async function cargarArticuloEditar(id) {
+    document.getElementById('page-subtitle').textContent = 'Editar publicación';
+    document.getElementById('page-title').textContent = 'Editar artículo';
+    document.getElementById('btn-publicar').textContent = 'Guardar cambios →';
+    try {
+      const a = await apiFetch(`/articulos/${id}`);
+      document.getElementById('pub-titulo').value = a.titulo;
+      document.getElementById('pub-resumen').value = a.resumen || '';
+      document.getElementById('pub-tags').value = a.tags || '';
+      if (a.seccion) document.getElementById('pub-seccion').value = a.seccion;
+      if (a.tipo_contenido === 'editor' && quill) {
+        quill.root.innerHTML = a.contenido_html || '';
+      }
+      seleccionarZona(a.zona);
+    } catch(e) { toast('Error al cargar artículo', 'error'); }
+  }
+
+  function mostrarVerificacion() {
+    document.getElementById('modal-verificacion').classList.add('open');
+  }
+  function cerrarVerificacion() {
+    document.getElementById('modal-verificacion').classList.remove('open');
+  }
+
+  async function verificarEmail() {
+    const codigo = document.getElementById('codigo-ver').value.trim();
+    const errEl = document.getElementById('ver-error');
+    const u = getUsuario();
+    errEl.style.display = 'none';
+    try {
+      await apiFetch('/auth/verificar-email', { method: 'POST', body: JSON.stringify({ email: u.email, codigo }) });
+      u.email_verificado = true;
+      localStorage.setItem('lri_usuario', JSON.stringify(u));
+      cerrarVerificacion();
+      document.getElementById('banner-verificacion').style.display = 'none';
+      toast('¡Email verificado! Ya puedes publicar en la zona académica 🎉', 'success');
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+
+  async function reenviarCodigo() {
+    const u = getUsuario();
+    try {
+      await apiFetch(`/auth/reenviar-codigo?email=${u.email}`, { method: 'POST' });
+      toast('Código reenviado a tu correo', 'info');
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function hacerLogin() {
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({
+        email: document.getElementById('login-email').value,
+        contrasena: document.getElementById('login-pass').value, recordarme: false
+      })});
+      setSession(res.access_token, res.usuario);
+      cerrarModal(); toast('¡Bienvenido!', 'success'); renderNavbar();
+      document.getElementById('necesita-login').style.display = 'none';
+      document.getElementById('form-publicar').style.display = 'block';
+      iniciarEditor(); cargarSecciones(); cargarOrganizaciones(); verificarEmailStatus();
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+
+  async function hacerRegistro() {
+    const errEl = document.getElementById('reg-error');
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch('/auth/registro', { method: 'POST', body: JSON.stringify({
+        nombre: document.getElementById('reg-nombre').value,
+        email: document.getElementById('reg-email').value,
+        contrasena: document.getElementById('reg-pass').value
+      })});
+      setSession(res.access_token, res.usuario);
+      cerrarModal(); toast('¡Cuenta creada! Revisa tu correo para el código de verificación.', 'success');
+      renderNavbar();
+      document.getElementById('necesita-login').style.display = 'none';
+      document.getElementById('form-publicar').style.display = 'block';
+      iniciarEditor(); cargarSecciones(); cargarOrganizaciones();
+      setTimeout(mostrarVerificacion, 1000);
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+</script>
+</body>
+</html>

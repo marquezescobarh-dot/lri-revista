@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizaciones — LRI</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .org-card { background: var(--blanco); border: 1.5px solid var(--borde); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; }
+    .org-card:hover { transform: translateY(-2px); box-shadow: var(--sombra-md); border-color: var(--azul); }
+    .org-nombre { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--texto); margin-bottom: 0.4rem; }
+    .org-tipo { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: var(--azul-claro); color: var(--azul); padding: 0.2rem 0.7rem; border-radius: 20px; display: inline-block; margin-bottom: 0.8rem; font-weight: 600; }
+    .org-desc { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--texto-2); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Facultad de Economía · UNAM</span>
+    </a>
+    <div class="navbar-links">
+      <a href="/index.html" class="nav-link">← Inicio</a>
+      <a href="/pages/organizaciones.html" class="nav-link active">Organizaciones</a>
+    </div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<div style="background:var(--azul);padding:3rem 2rem 2.5rem">
+  <div style="max-width:1000px;margin:0 auto">
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--oro);margin-bottom:0.8rem">Comunidad</p>
+    <h1 style="color:#fff;font-size:2rem">Organizaciones estudiantiles</h1>
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.95rem;color:rgba(255,255,255,0.6);margin-top:0.5rem">Colectivos, grupos de investigación y organizaciones de la Facultad de Economía.</p>
+  </div>
+</div>
+
+<div style="max-width:1000px;margin:0 auto;padding:3rem 2rem">
+  <!-- Buscador -->
+  <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
+    <input type="text" class="form-input" id="search-org" placeholder="Buscar organización..." style="flex:1;min-width:200px" oninput="buscarOrgs()">
+    <button class="btn btn-primary" onclick="abrirCrear()" id="btn-crear-org" style="display:none">+ Registrar organización</button>
+  </div>
+
+  <div class="articulos-grid" id="grid-orgs" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+    <div class="spinner"></div>
+  </div>
+  <div class="empty-state" id="empty-orgs" style="display:none">
+    <div class="empty-icon">🏛️</div>
+    <h3>No hay organizaciones registradas</h3>
+    <p>Sé la primera en registrar tu organización.</p>
+  </div>
+</div>
+
+<!-- Modal crear organización -->
+<div class="modal-overlay" id="modal-crear">
+  <div class="modal">
+    <div class="modal-header"><h3>Registrar organización</h3><button class="modal-close" onclick="cerrarCrear()">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nombre de la organización *</label><input type="text" class="form-input" id="org-nombre" placeholder="Ej: Círculo de Estudios Económicos"></div>
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select class="form-input" id="org-tipo">
+          <option value="Organización estudiantil">Organización estudiantil</option>
+          <option value="Grupo de investigación">Grupo de investigación</option>
+          <option value="Sociedad académica">Sociedad académica</option>
+          <option value="Colectivo">Colectivo</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-input" id="org-desc" placeholder="¿Qué hace tu organización?" style="min-height:100px"></textarea></div>
+      <div id="org-error" class="form-error" style="display:none"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="crearOrg()">Registrar organización</button>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--texto-3);margin-top:0.8rem;text-align:center">Al registrarla quedarás asociado automáticamente como miembro.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Auth -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <div class="modal-header"><h3>Acceder a LRI</h3><button class="modal-close" onclick="cerrarModal()">×</button></div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="cambiarTab('login')">Iniciar sesión</button>
+        <button class="modal-tab" data-tab="registro" onclick="cambiarTab('registro')">Registrarse</button>
+      </div>
+      <div class="modal-form" id="form-login">
+        <div class="form-group"><label class="form-label">Correo</label><input type="email" class="form-input" id="login-email"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input type="password" class="form-input" id="login-pass"></div>
+        <div id="login-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-secondary" style="width:100%" onclick="hacerLogin()">Iniciar sesión</button>
+      </div>
+      <div class="modal-form" id="form-registro" style="display:none">
+        <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input" id="reg-nombre"></div>
+        <div class="form-group"><label class="form-label">Correo</label><input type="email" class="form-input" id="reg-email"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input type="password" class="form-input" id="reg-pass"></div>
+        <div id="reg-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="hacerRegistro()">Crear cuenta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/auth-modal.js"></script>
+<script>
+  renderNavbar();
+  if (estaLogueado()) document.getElementById('btn-crear-org').style.display = 'inline-flex';
+
+  let todasOrgs = [];
+
+  async function cargarOrgs(q = '') {
+    const grid = document.getElementById('grid-orgs');
+    const empty = document.getElementById('empty-orgs');
+    try {
+      const url = q ? `/organizaciones/?q=${encodeURIComponent(q)}` : '/organizaciones/';
+      todasOrgs = await apiFetch(url);
+      grid.innerHTML = '';
+      if (!todasOrgs.length) { empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      const usuarioOrg = getUsuario()?.organizacion?.id;
+      todasOrgs.forEach(o => {
+        const esMiembro = usuarioOrg === o.id;
+        grid.innerHTML += `
+          <div class="org-card">
+            <div class="org-nombre">🏛️ ${o.nombre}</div>
+            ${o.tipo ? `<div class="org-tipo">${o.tipo}</div>` : ''}
+            ${o.descripcion ? `<p class="org-desc">${o.descripcion}</p>` : ''}
+            <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+              <a href="/index.html?org=${o.id}" class="btn btn-ghost btn-sm">Ver artículos</a>
+              ${estaLogueado() && !esMiembro ? `<button class="btn btn-sm btn-outline" onclick="unirse(${o.id},'${o.nombre}')">Unirme</button>` : ''}
+              ${esMiembro ? `<span style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--verde);padding:0.3rem 0.7rem">✓ Soy miembro</span>` : ''}
+            </div>
+          </div>`;
+      });
+    } catch(e) { grid.innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  let buscarTimer;
+  function buscarOrgs() {
+    clearTimeout(buscarTimer);
+    buscarTimer = setTimeout(() => cargarOrgs(document.getElementById('search-org').value.trim()), 350);
+  }
+
+  async function unirse(id, nombre) {
+    try {
+      await apiFetch(`/organizaciones/${id}/unirse`, { method: 'POST' });
+      const u = getUsuario();
+      u.organizacion = { id, nombre };
+      localStorage.setItem('lri_usuario', JSON.stringify(u));
+      toast(`Te uniste a ${nombre}`, 'success');
+      cargarOrgs();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function abrirCrear() {
+    if (!estaLogueado()) { abrirModal('login'); return; }
+    document.getElementById('modal-crear').classList.add('open');
+  }
+  function cerrarCrear() { document.getElementById('modal-crear').classList.remove('open'); }
+
+  async function crearOrg() {
+    const errEl = document.getElementById('org-error');
+    errEl.style.display = 'none';
+    const nombre = document.getElementById('org-nombre').value.trim();
+    if (!nombre) { errEl.textContent = 'El nombre es obligatorio'; errEl.style.display = 'block'; return; }
+    try {
+      const org = await apiFetch('/organizaciones/', { method: 'POST', body: JSON.stringify({
+        nombre,
+        tipo: document.getElementById('org-tipo').value,
+        descripcion: document.getElementById('org-desc').value || null
+      })});
+      const u = getUsuario();
+      u.organizacion = org;
+      localStorage.setItem('lri_usuario', JSON.stringify(u));
+      cerrarCrear();
+      toast(`¡Organización "${org.nombre}" registrada!`, 'success');
+      cargarOrgs();
+      document.getElementById('btn-crear-org').style.display = 'none';
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+
+  async function hacerLogin() {
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({
+        email: document.getElementById('login-email').value,
+        contrasena: document.getElementById('login-pass').value, recordarme: false
+      })});
+      setSession(res.access_token, res.usuario);
+      cerrarModal(); toast('¡Bienvenido!', 'success'); renderNavbar();
+      document.getElementById('btn-crear-org').style.display = 'inline-flex';
+      cargarOrgs();
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+
+  async function hacerRegistro() {
+    const errEl = document.getElementById('reg-error');
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch('/auth/registro', { method: 'POST', body: JSON.stringify({
+        nombre: document.getElementById('reg-nombre').value,
+        email: document.getElementById('reg-email').value,
+        contrasena: document.getElementById('reg-pass').value
+      })});
+      setSession(res.access_token, res.usuario);
+      cerrarModal(); toast('¡Cuenta creada!', 'success'); renderNavbar();
+      document.getElementById('btn-crear-org').style.display = 'inline-flex';
+    } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  }
+
+  cargarOrgs();
+</script>
+</body>
+</html>

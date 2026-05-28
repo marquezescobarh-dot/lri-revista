@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil — LRI</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .perfil-hero { background: linear-gradient(135deg, #003580 0%, #0046A8 60%, #1C3A2E 100%); padding: 3rem 2rem 5rem; }
+    .perfil-hero::after { content:''; display:block; height:50px; background:var(--fondo); clip-path: ellipse(55% 100% at 50% 100%); margin-top:-1px; }
+    .perfil-card { max-width: 900px; margin: -3rem auto 0; padding: 0 2rem; position: relative; z-index: 2; }
+    .perfil-main { background: var(--blanco); border: 1.5px solid var(--borde); border-radius: 20px; padding: 2rem; display: grid; grid-template-columns: 180px 1fr; gap: 2rem; }
+    .avatar-wrap { position: relative; width: 160px; }
+    .avatar-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; }
+    .avatar-placeholder { width: 160px; height: 160px; border-radius: 50%; background: var(--azul); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: #fff; font-weight: 700; border: 4px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .avatar-edit-btn { position: absolute; bottom: 8px; right: 8px; background: var(--azul); color: #fff; border: 2px solid #fff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .avatar-edit-btn:hover { background: var(--azul-medio); }
+    .nivel-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.9rem; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 700; background: var(--azul); color: #fff; margin-bottom: 0.6rem; }
+    .nivel-7 { background: linear-gradient(135deg, #C9963A, #8B6914) !important; }
+    .nivel-6 { background: linear-gradient(135deg, #003580, #0046A8) !important; }
+    .nivel-5 { background: linear-gradient(135deg, #1C3A2E, #2d5c44) !important; }
+    .perfil-nombre { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .perfil-sub { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--texto-2); margin-bottom: 0.8rem; }
+    .perfil-bio { font-size: 0.95rem; color: var(--texto); line-height: 1.7; margin-bottom: 1rem; font-style: italic; color: var(--texto-3); }
+    .stats-row { display: flex; gap: 2rem; flex-wrap: wrap; margin: 1rem 0; }
+    .stat-item { text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--azul); line-height: 1; }
+    .stat-num.oro { color: var(--oro); }
+    .stat-lbl { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--texto-3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+    .progreso-wrap { margin: 1rem 0; }
+    .progreso-label { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--texto-2); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+    .progreso-bar { height: 8px; background: var(--borde); border-radius: 4px; overflow: hidden; }
+    .progreso-fill { height: 100%; background: linear-gradient(90deg, var(--azul), var(--oro)); border-radius: 4px; transition: width 0.8s ease; }
+    .red-link { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; padding: 0.3rem 0.8rem; border: 1px solid var(--borde); border-radius: 20px; color: var(--texto-2); transition: all 0.2s; text-decoration: none; display: inline-block; margin: 0.2rem; }
+    .red-link:hover { border-color: var(--azul); color: var(--azul); background: var(--azul-claro); }
+    .ptabs { display: flex; border-bottom: 2px solid var(--borde); margin: 2rem 0 1.5rem; }
+    .ptab { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; padding: 0.7rem 1.3rem; color: var(--texto-2); border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: all 0.2s; background: none; border-left: none; border-right: none; border-top: none; }
+    .ptab:hover { color: var(--texto); }
+    .ptab.activo { color: var(--azul); border-bottom-color: var(--azul); }
+    .pcontent { display: none; }
+    .pcontent.activo { display: block; }
+    .edit-sec { background: var(--superficie); border: 1.5px solid var(--borde); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .edit-sec-titulo { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--texto-3); margin-bottom: 1rem; }
+    .hist-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid var(--borde); }
+    .hist-pts { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; min-width: 55px; }
+    .pts-pos { color: var(--verde); }
+    .pts-neg { color: #c0392b; }
+    .hist-razon { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--texto-2); flex: 1; }
+    .hist-fecha { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--texto-3); }
+    .priv-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--borde); }
+    .priv-row:last-child { border-bottom: none; }
+    .priv-label { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--texto); }
+    .priv-sub { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--texto-3); margin-top: 0.1rem; }
+    .toggle { position: relative; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--borde); border-radius: 24px; transition: 0.3s; }
+    .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+    .toggle input:checked + .toggle-slider { background: var(--azul); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+    @media (max-width: 600px) {
+      .perfil-main { grid-template-columns: 1fr; text-align: center; }
+      .avatar-wrap { margin: 0 auto; }
+      .stats-row { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Facultad de Economía · UNAM</span>
+    </a>
+    <div class="navbar-links"><a href="/index.html" class="nav-link">← Inicio</a></div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<div class="perfil-hero">
+  <div style="max-width:900px;margin:0 auto;text-align:center">
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--oro)">Perfil académico · LRI</p>
+  </div>
+</div>
+
+<div class="perfil-card">
+  <div id="perfil-main-card" class="perfil-main" style="display:none"></div>
+  <div id="perfil-loading" class="spinner" style="margin:3rem auto"></div>
+</div>
+
+<div style="max-width:900px;margin:0 auto;padding:0 2rem 4rem" id="perfil-body" style="display:none">
+  <div class="ptabs" id="ptabs-container"></div>
+
+  <div id="pcontent-articulos" class="pcontent activo">
+    <div class="articulos-grid" id="grid-mis-arts"></div>
+    <div class="empty-state" id="empty-arts" style="display:none">
+      <div class="empty-icon">📝</div>
+      <h3>Sin artículos aún</h3>
+      <p>Publica tu primer artículo en LRI.</p>
+      <a href="/pages/publicar.html" class="btn btn-primary" style="margin-top:1rem">Publicar ahora</a>
+    </div>
+  </div>
+
+  <div id="pcontent-sobre" class="pcontent">
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem" id="sobre-contenido"></div>
+  </div>
+
+  <div id="pcontent-editar" class="pcontent">
+    <div class="edit-sec">
+      <div class="edit-sec-titulo">Foto de perfil</div>
+      <div style="display:flex;align-items:center;gap:1.2rem">
+        <div id="foto-preview" style="width:72px;height:72px;border-radius:50%;background:var(--azul);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;overflow:hidden;flex-shrink:0"></div>
+        <div>
+          <input type="file" id="foto-input" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="previewFoto(this)">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('foto-input').click()">Cambiar foto</button>
+          <p class="form-hint" style="margin-top:0.4rem">JPG o PNG · Máximo 5MB</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-sec">
+      <div class="edit-sec-titulo">Información personal</div>
+      <div class="form-group">
+        <label class="form-label">Bio</label>
+        <textarea class="form-input" id="e-bio" placeholder="Cuéntanos sobre ti..." style="min-height:80px" maxlength="500"></textarea>
+        <p class="form-hint">Máximo 500 caracteres</p>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">País</label><input type="text" class="form-input" id="e-pais" placeholder="México"></div>
+        <div class="form-group"><label class="form-label">Ciudad</label><input type="text" class="form-input" id="e-ciudad" placeholder="Ciudad de México"></div>
+      </div>
+    </div>
+
+    <div class="edit-sec">
+      <div class="edit-sec-titulo">Perfil académico</div>
+      <div class="form-group">
+        <label class="form-label">Soy...</label>
+        <select class="form-input" id="e-tipo">
+          <option value="">Prefiero no especificar</option>
+          <option value="estudiante_unam">Estudiante UNAM</option>
+          <option value="estudiante_otra">Estudiante otra universidad</option>
+          <option value="egresado">Egresado</option>
+          <option value="profesionista">Profesionista</option>
+          <option value="investigador">Investigador</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Universidad / Institución</label><input type="text" class="form-input" id="e-universidad" placeholder="UNAM"></div>
+        <div class="form-group"><label class="form-label">Facultad / Departamento</label><input type="text" class="form-input" id="e-facultad" placeholder="Facultad de Economía"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Carrera</label><input type="text" class="form-input" id="e-carrera" placeholder="Economía"></div>
+        <div class="form-group"><label class="form-label">Semestre / Año</label><input type="number" class="form-input" id="e-semestre" placeholder="8" min="1" max="12"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Áreas de interés</label><input type="text" class="form-input" id="e-areas" placeholder="Macroeconomía, econometría, finanzas..."></div>
+    </div>
+
+    <div class="edit-sec">
+      <div class="edit-sec-titulo">Redes de contacto (opcionales)</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Twitter / X</label><input type="text" class="form-input" id="e-twitter" placeholder="@usuario"></div>
+        <div class="form-group"><label class="form-label">LinkedIn</label><input type="text" class="form-input" id="e-linkedin" placeholder="linkedin.com/in/..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email público</label><input type="email" class="form-input" id="e-email-pub" placeholder="correo@publico.com"></div>
+        <div class="form-group"><label class="form-label">Sitio web</label><input type="text" class="form-input" id="e-web" placeholder="https://mi-sitio.com"></div>
+      </div>
+    </div>
+
+    <div class="edit-sec">
+      <div class="edit-sec-titulo">Privacidad — ¿Qué ven los demás?</div>
+      <div class="priv-row">
+        <div><div class="priv-label">Email</div><div class="priv-sub">Por defecto oculto</div></div>
+        <label class="toggle"><input type="checkbox" id="priv-email"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="priv-row">
+        <div><div class="priv-label">Universidad y carrera</div><div class="priv-sub">Por defecto visible</div></div>
+        <label class="toggle"><input type="checkbox" id="priv-universidad" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="priv-row">
+        <div><div class="priv-label">Twitter / X</div><div class="priv-sub">Por defecto visible</div></div>
+        <label class="toggle"><input type="checkbox" id="priv-twitter" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="priv-row">
+        <div><div class="priv-label">LinkedIn</div><div class="priv-sub">Por defecto visible</div></div>
+        <label class="toggle"><input type="checkbox" id="priv-linkedin" checked><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div id="edit-error" class="form-error" style="display:none"></div>
+    <button class="btn btn-primary btn-lg" onclick="guardarPerfil()" id="btn-guardar">Guardar cambios</button>
+  </div>
+
+  <div id="pcontent-puntos" class="pcontent">
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
+      <h4 style="margin-bottom:1.5rem">¿Cómo ganar puntos?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div style="background:var(--azul-claro);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">📚</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;color:var(--azul)">Artículo académico aprobado</div>
+          <div style="color:var(--verde);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">+30 pts</div>
+        </div>
+        <div style="background:var(--verde-claro);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">✍️</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;color:var(--verde)">Artículo libre publicado</div>
+          <div style="color:var(--verde);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">+10 pts</div>
+        </div>
+        <div style="background:var(--superficie);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">❤️</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem">Like recibido</div>
+          <div style="color:var(--verde);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">+3 pts</div>
+        </div>
+        <div style="background:var(--superficie);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">💬</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem">Comentar</div>
+          <div style="color:var(--verde);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">+2 pts</div>
+        </div>
+        <div style="background:var(--oro-claro);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">🏆</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;color:#6b4c00">Top de la semana</div>
+          <div style="color:var(--oro);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">+40 pts</div>
+        </div>
+        <div style="background:var(--azul-claro);border-radius:10px;padding:1rem">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem">⭐</div>
+          <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;color:var(--azul)">Bonus de admin</div>
+          <div style="color:var(--azul);font-weight:700;font-size:1.1rem;font-family:'DM Sans',sans-serif">Variable</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--blanco);border:1.5px solid var(--borde);border-radius:14px;padding:2rem">
+      <h4 style="margin-bottom:1rem">Historial de puntos</h4>
+      <div id="historial-pts-lista"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-auth-titulo">Acceder a LRI</h3><button class="modal-close" onclick="cerrarModal()">×</button></div>
+    <div class="modal-body">
+      <div class="modal-tabs" id="auth-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="cambiarTab('login')">Iniciar sesión</button>
+        <button class="modal-tab" data-tab="registro" onclick="cambiarTab('registro')">Registrarse</button>
+      </div>
+      <div class="modal-form" id="form-login">
+        <div class="form-group"><label class="form-label">Correo electrónico</label><input type="email" class="form-input" id="login-email" placeholder="tucorreo@ejemplo.com"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label>
+          <div style="position:relative"><input type="password" class="form-input" id="login-pass" placeholder="••••••••" style="padding-right:2.8rem"><button type="button" onclick="togglePass('login-pass','ojo-login')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--texto-3)" id="ojo-login" style="font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;color:var(--texto-2)">Mostrar</button></div>
+        </div>
+        <div class="form-group" style="display:flex;justify-content:space-between;align-items:center">
+          <label class="form-check"><input type="checkbox" id="login-remember"> Recordarme 30 días</label>
+          <button type="button" onclick="mostrarRecuperar()" style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline">¿Olvidaste tu contraseña?</button>
+        </div>
+        <div id="login-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-secondary" style="width:100%" onclick="hacerLogin()">Iniciar sesión</button>
+      </div>
+      <div class="modal-form" id="form-registro" style="display:none">
+        <div class="form-group"><label class="form-label">Nombre completo</label><input type="text" class="form-input" id="reg-nombre" placeholder="Tu nombre"></div>
+        <div class="form-group"><label class="form-label">Correo electrónico</label><input type="email" class="form-input" id="reg-email" placeholder="tucorreo@ejemplo.com"></div>
+        <div class="form-group"><label class="form-label">Contraseña</label><input type="password" class="form-input" id="reg-pass" placeholder="Mínimo 8 caracteres"></div>
+        <div id="reg-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="hacerRegistro()">Crear cuenta</button>
+      </div>
+      <div class="modal-form" id="form-verificacion" style="display:none">
+        <div style="text-align:center;margin-bottom:1.5rem"><div style="font-size:2.5rem;margin-bottom:0.5rem">📧</div><p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto-2)">Ingresa el código de 6 dígitos enviado a tu correo.</p></div>
+        <div class="form-group"><label class="form-label">Código de verificación</label><input type="text" class="form-input" id="ver-codigo" placeholder="000000" maxlength="6" style="font-size:1.8rem;letter-spacing:10px;text-align:center;font-family:monospace" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+        <div id="ver-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:0.8rem" onclick="verificarEmail()">Verificar</button>
+        <button type="button" onclick="reenviarCodigo()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline;display:block;text-align:center;width:100%">Reenviar código</button>
+      </div>
+      <div class="modal-form" id="form-recuperar" style="display:none">
+        <div id="recuperar-paso1">
+          <div class="form-group"><label class="form-label">Tu correo electrónico</label><input type="email" class="form-input" id="rec-email" placeholder="tucorreo@ejemplo.com"></div>
+          <div id="rec-error1" class="form-error" style="display:none"></div>
+          <button class="btn btn-primary" style="width:100%;margin-bottom:0.8rem" onclick="enviarCodigoRecuperacion()">Enviar código</button>
+          <button type="button" onclick="mostrarLogin()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--texto-2);background:none;border:none;cursor:pointer;text-decoration:underline;display:block;text-align:center;width:100%">← Volver al login</button>
+        </div>
+        <div id="recuperar-paso2" style="display:none">
+          <div class="form-group"><label class="form-label">Código de verificación</label><input type="text" class="form-input" id="rec-codigo" placeholder="000000" maxlength="6" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+          <div class="form-group"><label class="form-label">Nueva contraseña</label><input type="password" class="form-input" id="rec-nueva-pass" placeholder="Mínimo 8 caracteres"></div>
+          <div id="rec-error2" class="form-error" style="display:none"></div>
+          <button class="btn btn-primary" style="width:100%" onclick="resetContrasena()">Cambiar contraseña</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/auth-modal.js"></script>
+<script>
+  renderNavbar();
+  const params = new URLSearchParams(window.location.search);
+  const usuarioId = params.get('id');
+  const esMiPerfil = !usuarioId || usuarioId == getUsuario()?.id;
+  let dataPerfil = null;
+
+  async function cargarPerfil() {
+    try {
+      const endpoint = esMiPerfil && estaLogueado() ? '/perfil/yo/completo' : `/perfil/${usuarioId || getUsuario()?.id}`;
+      dataPerfil = await apiFetch(endpoint);
+      renderPerfil();
+    } catch(e) {
+      document.getElementById('perfil-loading').style.display = 'none';
+      document.getElementById('perfil-main-card').style.display = 'none';
+      document.getElementById('perfil-body').innerHTML = '<div class="empty-state" style="padding:4rem"><div class="empty-icon">😕</div><h3>Perfil no encontrado</h3><a href="/index.html" class="btn btn-secondary" style="margin-top:1rem">Volver al inicio</a></div>';
+      document.getElementById('perfil-body').style.display = 'block';
+    }
+  }
+
+  function renderPerfil() {
+    const d = dataPerfil;
+    document.getElementById('perfil-loading').style.display = 'none';
+    document.title = `${d.nombre} — LRI`;
+
+    const nivelClass = `nivel-${d.nivel}`;
+    const nivelData = NIVELES[Math.min((d.nivel || 1) - 1, NIVELES.length - 1)];
+    const subInfo = [d.carrera, d.universidad, d.ciudad, d.pais].filter(Boolean).join(' · ');
+    const nivelInfo = d.nivel_info || {};
+
+    const avatarHTML = d.foto_perfil
+      ? `<img class="avatar-img" src="${API}/uploads/avatars/${d.foto_perfil}">`
+      : `<div class="avatar-placeholder">${d.nombre[0].toUpperCase()}</div>`;
+
+    const progresoHTML = nivelInfo.nivel_siguiente
+      ? `<div class="progreso-wrap">
+          <div class="progreso-label"><span>${nivelData.titulo}</span><span>${nivelInfo.puntos_para_siguiente} pts para ${nivelInfo.nivel_siguiente.titulo}</span></div>
+          <div class="progreso-bar"><div class="progreso-fill" style="width:${nivelInfo.progreso_porcentaje}%"></div></div>
+        </div>`
+      : `<p style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--oro);margin-top:0.5rem">🏆 Nivel máximo alcanzado</p>`;
+
+    const redesHTML = [
+      d.twitter ? `<a href="https://twitter.com/${d.twitter}" target="_blank" class="red-link">𝕏 @${d.twitter}</a>` : '',
+      d.linkedin ? `<a href="${d.linkedin}" target="_blank" class="red-link">in LinkedIn</a>` : '',
+      d.email_publico ? `<a href="mailto:${d.email_publico}" class="red-link">✉️ Email</a>` : '',
+      d.sitio_web ? `<a href="${d.sitio_web}" target="_blank" class="red-link">🌐 Web</a>` : '',
+    ].filter(Boolean).join('');
+
+    const card = document.getElementById('perfil-main-card');
+    card.innerHTML = `
+      <div class="avatar-wrap">
+        ${avatarHTML}
+        ${esMiPerfil ? `<button class="avatar-edit-btn" onclick="document.getElementById('foto-input').click()">✏️</button>` : ''}
+      </div>
+      <div>
+        <div class="nivel-badge ${nivelClass}">${nivelData.titulo}</div>
+        ${d.organizacion ? `<div style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--texto-3);margin-bottom:0.3rem">🏛️ ${d.organizacion.nombre}</div>` : ''}
+        <h1 class="perfil-nombre">${d.nombre}</h1>
+        ${subInfo ? `<p class="perfil-sub">${subInfo}</p>` : ''}
+        ${d.bio ? `<p class="perfil-bio">${d.bio}</p>` : (esMiPerfil ? `<p class="perfil-bio">Agrega una bio en "Editar perfil"</p>` : '')}
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-num">${d.stats?.articulos || 0}</div><div class="stat-lbl">Artículos</div></div>
+          <div class="stat-item"><div class="stat-num">${d.stats?.likes_recibidos || 0}</div><div class="stat-lbl">Likes</div></div>
+          <div class="stat-item"><div class="stat-num">${d.stats?.comentarios || 0}</div><div class="stat-lbl">Comentarios</div></div>
+          <div class="stat-item"><div class="stat-num oro">${d.puntos || 0}</div><div class="stat-lbl">Puntos</div></div>
+        </div>
+        ${progresoHTML}
+        ${redesHTML ? `<div style="margin-top:0.8rem">${redesHTML}</div>` : ''}
+      </div>`;
+    card.style.display = 'grid';
+
+    const tabs = document.getElementById('ptabs-container');
+    let tabsHTML = `<button class="ptab activo" onclick="cambiarPtab('articulos', this)">📄 Artículos</button>`;
+    tabsHTML += `<button class="ptab" onclick="cambiarPtab('sobre', this)">👤 Sobre</button>`;
+    if (esMiPerfil) {
+      tabsHTML += `<button class="ptab" onclick="cambiarPtab('editar', this)">⚙️ Editar perfil</button>`;
+      tabsHTML += `<button class="ptab" onclick="cambiarPtab('puntos', this)">⭐ Mis puntos</button>`;
+    }
+    tabs.innerHTML = tabsHTML;
+
+    document.getElementById('perfil-body').style.display = 'block';
+    cargarArticulosPerfil();
+    renderSobre();
+    if (esMiPerfil) {
+      rellenarFormEdit();
+      cargarHistorial();
+    }
+  }
+
+  function cambiarPtab(nombre, btn) {
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.pcontent').forEach(c => c.classList.remove('activo'));
+    btn.classList.add('activo');
+    const el = document.getElementById(`pcontent-${nombre}`);
+    if (el) el.classList.add('activo');
+  }
+
+  async function cargarArticulosPerfil() {
+    const grid = document.getElementById('grid-mis-arts');
+    const empty = document.getElementById('empty-arts');
+    try {
+      const arts = esMiPerfil
+        ? await apiFetch('/articulos/mis/articulos')
+        : (await apiFetch(`/buscar/articulos?orden=reciente`)).filter(a => a.autor.id == (usuarioId || getUsuario()?.id));
+      grid.innerHTML = '';
+      if (!arts.length) { empty.style.display = 'block'; return; }
+      arts.forEach(a => {
+        grid.innerHTML += `<a href="/pages/articulo.html?id=${a.id}" class="articulo-card">
+          <div class="card-zona-badge ${a.zona}"></div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="badge badge-${a.zona}">${a.zona === 'academico' ? 'Académico' : 'Libre'}</span>
+              <span class="badge badge-${a.estado === 'aprobado' ? 'libre' : a.estado === 'pendiente' ? 'pendiente' : 'rechazado'}">${a.estado}</span>
+              <span class="card-fecha">${fechaLegible(a.creado_en)}</span>
+            </div>
+            <div class="card-titulo">${a.titulo}</div>
+            ${a.resumen ? `<p class="card-resumen">${a.resumen}</p>` : ''}
+          </div>
+        </a>`;
+      });
+    } catch(e) {}
+  }
+
+  function renderSobre() {
+    const d = dataPerfil;
+    const items = [
+      d.tipo_usuario ? `<div class="form-group"><label class="form-label">Tipo</label><p style="font-family:'DM Sans',sans-serif">${d.tipo_usuario.replace(/_/g,' ')}</p></div>` : '',
+      d.universidad ? `<div class="form-group"><label class="form-label">Universidad</label><p style="font-family:'DM Sans',sans-serif">${d.universidad}</p></div>` : '',
+      d.facultad ? `<div class="form-group"><label class="form-label">Facultad</label><p style="font-family:'DM Sans',sans-serif">${d.facultad}</p></div>` : '',
+      d.carrera ? `<div class="form-group"><label class="form-label">Carrera</label><p style="font-family:'DM Sans',sans-serif">${d.carrera}</p></div>` : '',
+      d.semestre ? `<div class="form-group"><label class="form-label">Semestre</label><p style="font-family:'DM Sans',sans-serif">${d.semestre}°</p></div>` : '',
+    ].filter(Boolean);
+
+    let html = items.length
+      ? `<div class="form-row" style="flex-wrap:wrap">${items.join('')}</div>` : '';
+
+    if (d.areas_interes) {
+      html += `<div style="margin-top:1.5rem"><p class="form-label">Áreas de interés</p><div class="card-tags" style="margin-top:0.4rem">${d.areas_interes.split(',').map(a => `<span class="tag">${a.trim()}</span>`).join('')}</div></div>`;
+    }
+
+    document.getElementById('sobre-contenido').innerHTML = html || '<p style="font-family:\'DM Sans\',sans-serif;color:var(--texto-3);text-align:center;padding:2rem">No hay información académica disponible.</p>';
+  }
+
+  function rellenarFormEdit() {
+    const d = dataPerfil;
+    const preview = document.getElementById('foto-preview');
+    preview.innerHTML = d.foto_perfil
+      ? `<img src="${API}/uploads/avatars/${d.foto_perfil}" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`
+      : d.nombre[0].toUpperCase();
+    const campos = { 'e-bio': d.bio, 'e-pais': d.pais, 'e-ciudad': d.ciudad, 'e-tipo': d.tipo_usuario, 'e-universidad': d.universidad, 'e-facultad': d.facultad, 'e-carrera': d.carrera, 'e-semestre': d.semestre, 'e-areas': d.areas_interes, 'e-twitter': d.twitter, 'e-linkedin': d.linkedin, 'e-email-pub': d.email_publico, 'e-web': d.sitio_web };
+    Object.entries(campos).forEach(([id, val]) => { const el = document.getElementById(id); if (el && val != null) el.value = val; });
+    if (document.getElementById('priv-email')) document.getElementById('priv-email').checked = d.mostrar_email || false;
+    if (document.getElementById('priv-universidad')) document.getElementById('priv-universidad').checked = d.mostrar_universidad !== false;
+    if (document.getElementById('priv-twitter')) document.getElementById('priv-twitter').checked = d.mostrar_twitter !== false;
+    if (document.getElementById('priv-linkedin')) document.getElementById('priv-linkedin').checked = d.mostrar_linkedin !== false;
+  }
+
+  function cargarHistorial() {
+    const h = dataPerfil.historial_puntos || [];
+    const lista = document.getElementById('historial-pts-lista');
+    if (!h.length) {
+      lista.innerHTML = '<p style="font-family:\'DM Sans\',sans-serif;color:var(--texto-3);text-align:center;padding:2rem">Aún no tienes puntos. ¡Publica tu primer artículo!</p>';
+      return;
+    }
+    lista.innerHTML = h.map(item => `
+      <div class="hist-item">
+        <span class="hist-pts ${item.puntos >= 0 ? 'pts-pos' : 'pts-neg'}">${item.puntos >= 0 ? '+' : ''}${item.puntos}</span>
+        <span class="hist-razon">${item.razon}</span>
+        <span class="hist-fecha">${fechaLegible(item.fecha)}</span>
+      </div>`).join('');
+  }
+
+  function previewFoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('foto-preview').innerHTML = `<img src="${e.target.result}" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function guardarPerfil() {
+    const errEl = document.getElementById('edit-error');
+    errEl.style.display = 'none';
+    const btn = document.getElementById('btn-guardar');
+    btn.textContent = 'Guardando...';
+    btn.disabled = true;
+    const fd = new FormData();
+    const campos = { bio: 'e-bio', pais: 'e-pais', ciudad: 'e-ciudad', tipo_usuario: 'e-tipo', universidad: 'e-universidad', facultad: 'e-facultad', carrera: 'e-carrera', semestre: 'e-semestre', areas_interes: 'e-areas', twitter: 'e-twitter', linkedin: 'e-linkedin', email_publico: 'e-email-pub', sitio_web: 'e-web' };
+    Object.entries(campos).forEach(([key, id]) => {
+      const el = document.getElementById(id);
+      if (el) fd.append(key, el.value || '');
+    });
+    fd.append('mostrar_email', document.getElementById('priv-email')?.checked ? 'true' : 'false');
+    fd.append('mostrar_universidad', document.getElementById('priv-universidad')?.checked ? 'true' : 'false');
+    fd.append('mostrar_twitter', document.getElementById('priv-twitter')?.checked ? 'true' : 'false');
+    fd.append('mostrar_linkedin', document.getElementById('priv-linkedin')?.checked ? 'true' : 'false');
+    const fotoFile = document.getElementById('foto-input')?.files[0];
+    if (fotoFile) fd.append('foto', fotoFile);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API}/perfil/editar`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: fd });
+      if (!res.ok) throw new Error('Error al guardar');
+      dataPerfil = await res.json();
+      toast('Perfil actualizado ✓', 'success');
+      renderPerfil();
+      setTimeout(() => cambiarPtab('articulos', document.querySelector('.ptab')), 100);
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    }
+    btn.textContent = 'Guardar cambios';
+    btn.disabled = false;
+  }
+
+  cargarPerfil();
+</script>
+</body>
+</html>

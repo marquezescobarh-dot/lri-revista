@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Riqueza de las Ideas — Revista Estudiantil de Economía, UNAM</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .buscador-hero { background: var(--superficie); border: 1.5px solid var(--borde); border-radius: 14px; padding: 2rem; margin-bottom: 2.5rem; }
+    .buscador-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .buscador-input-wrap { flex: 1; min-width: 200px; position: relative; }
+    .buscador-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--texto-3); font-size: 1rem; }
+    .buscador-input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1.5px solid var(--borde); border-radius: 8px; background: var(--blanco); font-size: 0.9rem; font-family: 'DM Sans', sans-serif; color: var(--texto); transition: border-color 0.2s; }
+    .buscador-input:focus { border-color: var(--azul); outline: none; }
+    .filtros-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.8rem; align-items: center; }
+    .filtro-select { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 0.45rem 0.9rem; border: 1.5px solid var(--borde); border-radius: 8px; background: var(--blanco); color: var(--texto-2); cursor: pointer; transition: border-color 0.2s; }
+    .filtro-select:focus { border-color: var(--azul); outline: none; }
+    .filtro-label { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--texto-3); }
+    .top-semana { background: linear-gradient(135deg, var(--azul) 0%, #0046A8 100%); border-radius: 16px; padding: 2rem; margin-bottom: 3rem; color: #fff; }
+    .top-semana-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem; }
+    .top-semana-header h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #fff; }
+    .top-semana-header .subtitulo { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+    .top-lista { display: flex; flex-direction: column; gap: 0.6rem; }
+    .top-item { display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 0.8rem 1rem; transition: background 0.2s; text-decoration: none; }
+    .top-item:hover { background: rgba(255,255,255,0.18); }
+    .top-num { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--oro); min-width: 28px; line-height: 1; }
+    .top-info { flex: 1; }
+    .top-titulo { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; color: #fff; line-height: 1.3; }
+    .top-autor { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 0.2rem; }
+    .top-likes { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 0.3rem; }
+    .secciones-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .seccion-pill { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.9rem; border: 1.5px solid var(--borde); border-radius: 20px; color: var(--texto-2); cursor: pointer; transition: all 0.2s; background: var(--blanco); }
+    .seccion-pill:hover { border-color: var(--azul); color: var(--azul); background: var(--azul-claro); }
+    .seccion-pill.active { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .like-btn { display: flex; align-items: center; gap: 0.35rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--texto-3); border: 1px solid var(--borde); padding: 0.3rem 0.7rem; border-radius: 20px; background: transparent; cursor: pointer; transition: all 0.2s; }
+    .like-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+    .like-btn.liked { background: #fdecea; border-color: #e74c3c; color: #e74c3c; }
+    .resultados-info { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--texto-2); margin-bottom: 1.2rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Facultad de Economía · UNAM</span>
+    </a>
+    <div class="navbar-links">
+      <a href="/index.html" class="nav-link active">Inicio</a>
+      <a href="#academico" class="nav-link">Académico</a>
+      <a href="#libre" class="nav-link">Libre Expresión</a>
+      <a href="#buscar" class="nav-link">Buscar</a>
+      <a href="/pages/publicar.html" class="btn-nav btn-nav-solid">+ Publicar</a>
+    </div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Revista Estudiantil · Economía UNAM</p>
+    <h1><em>La Riqueza</em> de las Ideas</h1>
+    <p class="hero-desc">Espacio de difusión académica y libre expresión para los estudiantes de la Facultad de Economía de la Universidad Nacional Autónoma de México.</p>
+    <div class="hero-actions">
+      <a href="#academico" class="btn btn-primary btn-lg">Ver artículos académicos</a>
+      <a href="#libre" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.4)">Libre expresión</a>
+    </div>
+  </div>
+</section>
+
+<div class="container" style="padding-top:3rem">
+
+  <!-- Top de la semana -->
+  <div class="top-semana" id="top-semana-section">
+    <div class="top-semana-header">
+      <div>
+        <h3>🏆 Lo más leído esta semana</h3>
+        <div class="subtitulo">Artículos con más likes en los últimos 7 días</div>
+      </div>
+    </div>
+    <div class="top-lista" id="top-lista">
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.5)">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="buscador-hero" id="buscar">
+    <div style="margin-bottom:1rem">
+      <h3 style="font-size:1.1rem;margin-bottom:0.3rem">Buscar artículos</h3>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto-2)">Encuentra por título, autor, tema o etiqueta.</p>
+    </div>
+    <div class="buscador-row">
+      <div class="buscador-input-wrap">
+        <span class="buscador-icon">🔍</span>
+        <input type="text" class="buscador-input" id="search-q" placeholder="Buscar por título, tema, etiqueta..." oninput="buscarDebounce()">
+      </div>
+      <input type="text" class="buscador-input" id="search-autor" placeholder="Por autor..." style="max-width:200px" oninput="buscarDebounce()">
+      <button class="btn btn-secondary btn-sm" onclick="buscar()">Buscar</button>
+    </div>
+    <div class="filtros-row">
+      <span class="filtro-label">Filtrar:</span>
+      <select class="filtro-select" id="search-zona" onchange="buscar()">
+        <option value="">Todas las zonas</option>
+        <option value="academico">Académico</option>
+        <option value="libre">Libre expresión</option>
+      </select>
+      <select class="filtro-select" id="search-orden" onchange="buscar()">
+        <option value="reciente">Más reciente</option>
+        <option value="likes">Más likeados</option>
+        <option value="alfabetico">A-Z</option>
+      </select>
+    </div>
+    <div id="seccion-seleccionada-label" style="display:none;margin-top:0.8rem">
+      <span style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--texto-2)">Sección: </span>
+      <span id="seccion-badge" class="badge badge-academico"></span>
+      <button onclick="limpiarSeccion()" style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--texto-3);background:none;border:none;cursor:pointer;margin-left:0.5rem">✕ quitar</button>
+    </div>
+  </div>
+
+  <!-- Resultados de búsqueda -->
+  <div id="resultados-busqueda" style="display:none;margin-bottom:3rem">
+    <div class="resultados-info" id="resultados-info"></div>
+    <div class="articulos-grid" id="grid-resultados"></div>
+    <div class="empty-state" id="empty-resultados" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <h3>Sin resultados</h3>
+      <p>Intenta con otros términos o filtros.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Secciones temáticas -->
+<section class="section-sm" style="background:var(--superficie);border-top:1.5px solid var(--borde);border-bottom:1.5px solid var(--borde)">
+  <div class="container">
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--texto-3);margin-bottom:0.8rem">Explorar por sección</p>
+    <div class="secciones-pills" id="secciones-pills"></div>
+  </div>
+</section>
+
+<!-- Zona Académica -->
+<section class="section" id="academico">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-eyebrow">Zona Académica</span>
+        <h2>Artículos revisados</h2>
+        <p class="section-desc">Publicaciones con revisión editorial del equipo de La Riqueza de las Ideas.</p>
+      </div>
+      <a href="/pages/publicar.html?zona=academico" class="btn btn-secondary btn-sm">+ Enviar artículo</a>
+    </div>
+    <div id="grid-academico" class="articulos-grid"><div class="spinner"></div></div>
+    <div id="empty-academico" class="empty-state" style="display:none">
+      <div class="empty-icon">📄</div>
+      <h3>Aún no hay artículos académicos</h3>
+      <p>Sé el primero en publicar en esta zona.</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div style="border-top:2px solid var(--borde)"></div></div>
+
+<!-- Zona Libre -->
+<section class="section" id="libre">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-eyebrow" style="color:var(--verde)">Libre Expresión</span>
+        <h2>Voces estudiantiles</h2>
+        <p class="section-desc">Publicación directa sin revisión editorial. Todas las ideas son bienvenidas.</p>
+      </div>
+      <a href="/pages/publicar.html?zona=libre" class="btn btn-sm" style="background:var(--verde);color:#fff">+ Publicar ahora</a>
+    </div>
+    <div id="grid-libre" class="articulos-grid"><div class="spinner"></div></div>
+    <div id="empty-libre" class="empty-state" style="display:none">
+      <div class="empty-icon">✍️</div>
+      <h3>Aún no hay artículos</h3>
+      <p>Comparte tus ideas con la comunidad.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- Sección de contacto -->
+<section style="background:var(--azul);padding:4rem 2rem;margin-top:2rem">
+  <div style="max-width:700px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--oro);margin-bottom:0.8rem">Soporte</p>
+      <h2 style="color:#fff;font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:0.5rem">¿Tienes alguna duda o sugerencia?</h2>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.6)">Escríbenos y el equipo editorial te responderá. Puedes adjuntar una imagen si lo necesitas.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;padding:2rem">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" style="color:rgba(255,255,255,0.7)">Nombre</label>
+          <input type="text" class="form-input" id="cont-nombre" placeholder="Tu nombre" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="color:rgba(255,255,255,0.7)">Correo</label>
+          <input type="email" class="form-input" id="cont-email" placeholder="tucorreo@ejemplo.com" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:rgba(255,255,255,0.7)">Asunto</label>
+        <input type="text" class="form-input" id="cont-asunto" placeholder="¿En qué podemos ayudarte?" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:rgba(255,255,255,0.7)">Mensaje</label>
+        <textarea class="form-input" id="cont-mensaje" placeholder="Cuéntanos tu duda, sugerencia o problema..." style="min-height:120px;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:rgba(255,255,255,0.7)">Imagen adjunta (opcional)</label>
+        <input type="file" class="form-input" id="cont-imagen" accept=".jpg,.jpeg,.png,.webp" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)">
+        <p style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.3rem">JPG o PNG para capturas de pantalla, errores, etc.</p>
+      </div>
+      <div id="cont-error" style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#e74c3c;display:none;margin-bottom:0.8rem"></div>
+      <button class="btn btn-primary" onclick="enviarContacto()" id="btn-contacto" style="width:100%">Enviar mensaje</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">La Riqueza de las Ideas</div>
+      <p class="footer-desc">Revista estudiantil de la Facultad de Economía de la Universidad Nacional Autónoma de México.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Secciones</h4>
+      <a href="#academico" class="footer-link">Zona Académica</a>
+      <a href="#libre" class="footer-link">Libre Expresión</a>
+      <a href="/pages/publicar.html" class="footer-link">Publicar</a>
+    </div>
+    <div class="footer-col">
+      <h4>Información</h4>
+      <a href="https://economia.unam.mx" target="_blank" class="footer-link">Facultad de Economía</a>
+      <a href="https://unam.mx" target="_blank" class="footer-link">UNAM</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 La Riqueza de las Ideas · Facultad de Economía, UNAM</span>
+    <span>Inspirada en Adam Smith · <em>La Riqueza de las Naciones</em></span>
+  </div>
+</footer>
+
+<!-- Modal Auth v5 — incluir en todas las páginas -->
+<!-- Copia este bloque antes del cierre de </body> -->
+
+<!--
+MODAL AUTH — LA RIQUEZA DE LAS IDEAS v5
+Incluye: Login, Registro simplificado, Verificación email, Recuperar contraseña
+Fixes: ojito contraseña, label correcto, registro abierto
+-->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <h3 id="modal-auth-titulo">Acceder a LRI</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- TABS -->
+      <div class="modal-tabs" id="auth-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="cambiarTab('login')">Iniciar sesión</button>
+        <button class="modal-tab" data-tab="registro" onclick="cambiarTab('registro')">Registrarse</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="modal-form" id="form-login">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" class="form-input" id="login-email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <div style="position:relative">
+            <input type="password" class="form-input" id="login-pass" placeholder="••••••••" autocomplete="current-password" style="padding-right:2.8rem">
+            <button type="button" onclick="togglePass('login-pass','ojo-login')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--texto-3);font-size:1rem" id="ojo-login" style="font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;color:var(--texto-2)">Mostrar</button>
+          </div>
+        </div>
+        <div class="form-group" style="display:flex;justify-content:space-between;align-items:center">
+          <label class="form-check"><input type="checkbox" id="login-remember"> Recordarme 30 días</label>
+          <button type="button" onclick="mostrarRecuperar()" style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline">¿Olvidaste tu contraseña?</button>
+        </div>
+        <div id="login-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-secondary" style="width:100%" onclick="hacerLogin()">Iniciar sesión</button>
+      </div>
+
+      <!-- REGISTRO -->
+      <div class="modal-form" id="form-registro" style="display:none">
+        <p style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--texto-2);margin-bottom:1.2rem">Crea tu cuenta en segundos. Puedes completar tu perfil académico después.</p>
+        <div class="form-group">
+          <label class="form-label">Nombre completo</label>
+          <input type="text" class="form-input" id="reg-nombre" placeholder="Tu nombre" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" class="form-input" id="reg-email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <div style="position:relative">
+            <input type="password" class="form-input" id="reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="padding-right:2.8rem">
+            <button type="button" onclick="togglePass('reg-pass','ojo-reg')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--texto-3);font-size:1rem" id="ojo-reg" style="font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;color:var(--texto-2)">Mostrar</button>
+          </div>
+          <div id="pass-strength" style="margin-top:0.4rem;height:4px;border-radius:2px;background:var(--borde);overflow:hidden"><div id="pass-strength-bar" style="height:100%;width:0;transition:all 0.3s;border-radius:2px"></div></div>
+          <p class="form-hint" id="pass-hint">Mínimo 8 caracteres</p>
+        </div>
+        <div id="reg-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="hacerRegistro()">Crear cuenta gratuita</button>
+        <p style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--texto-3);text-align:center;margin-top:0.8rem">Abierto a todos — estudiantes, profesionistas y entusiastas de la economía</p>
+      </div>
+
+      <!-- VERIFICACIÓN EMAIL -->
+      <div class="modal-form" id="form-verificacion" style="display:none">
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem">📧</div>
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--texto-2)">Enviamos un código de 6 dígitos a tu correo.</p>
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--texto-3);margin-top:0.3rem">En modo desarrollo aparece en la terminal del backend.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Código de verificación</label>
+          <input type="text" class="form-input" id="ver-codigo" placeholder="000000" maxlength="6" style="font-size:1.8rem;letter-spacing:10px;text-align:center;font-family:monospace" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div id="ver-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:0.8rem" onclick="verificarEmail()">Verificar email</button>
+        <button type="button" onclick="reenviarCodigo()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--azul);background:none;border:none;cursor:pointer;text-decoration:underline;display:block;text-align:center;width:100%">Reenviar código</button>
+      </div>
+
+      <!-- RECUPERAR CONTRASEÑA -->
+      <div class="modal-form" id="form-recuperar" style="display:none">
+        <div id="recuperar-paso1">
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--texto-2);margin-bottom:1.2rem">Ingresa tu correo y te enviaremos un código para restablecer tu contraseña.</p>
+          <div class="form-group">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-input" id="rec-email" placeholder="tucorreo@ejemplo.com">
+          </div>
+          <div id="rec-error1" class="form-error" style="display:none"></div>
+          <button class="btn btn-primary" style="width:100%;margin-bottom:0.8rem" onclick="enviarCodigoRecuperacion()">Enviar código</button>
+          <button type="button" onclick="mostrarLogin()" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--texto-2);background:none;border:none;cursor:pointer;text-decoration:underline;display:block;text-align:center;width:100%">← Volver al login</button>
+        </div>
+        <div id="recuperar-paso2" style="display:none">
+          <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--texto-2);margin-bottom:1.2rem">Ingresa el código que recibiste y tu nueva contraseña.</p>
+          <div class="form-group">
+            <label class="form-label">Código de verificación</label>
+            <input type="text" class="form-input" id="rec-codigo" placeholder="000000" maxlength="6" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nueva contraseña</label>
+            <div style="position:relative">
+              <input type="password" class="form-input" id="rec-nueva-pass" placeholder="Mínimo 8 caracteres" style="padding-right:2.8rem">
+              <button type="button" onclick="togglePass('rec-nueva-pass','ojo-rec')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--texto-3);font-size:1rem" id="ojo-rec" style="font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:600;color:var(--texto-2)">Mostrar</button>
+            </div>
+          </div>
+          <div id="rec-error2" class="form-error" style="display:none"></div>
+          <button class="btn btn-primary" style="width:100%" onclick="resetContrasena()">Cambiar contraseña</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="toast-container"></div>
+<script src="js/api.js"></script>
+<script src="js/auth-modal.js"></script>
+<script src="js/auth-modal.js"></script>
+<script>
+  renderNavbar();
+  let seccionActiva = null;
+  let buscarTimer = null;
+
+  // Tarjeta de artículo
+  function cardHTML(a) {
+    const tags = a.tags ? a.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
+    return `
+      <div class="articulo-card">
+        <div class="card-zona-badge ${a.zona}"></div>
+        <a href="/pages/articulo.html?id=${a.id}" style="text-decoration:none;color:inherit;flex:1;display:flex;flex-direction:column">
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="badge badge-${a.zona}">${a.zona === 'academico' ? 'Académico' : 'Libre expresión'}</span>
+              <span class="card-fecha">${fechaLegible(a.creado_en)}</span>
+            </div>
+            <div class="card-titulo">${a.titulo}</div>
+            ${a.resumen ? `<p class="card-resumen">${a.resumen}</p>` : ''}
+            ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+          </div>
+        </a>
+        <div class="card-footer">
+          <span class="card-autor">Por <strong>${a.autor.nombre}</strong></span>
+          <button class="like-btn" id="like-${a.id}" onclick="toggleLike(${a.id}, event)">❤️ <span id="likes-count-${a.id}">-</span></button>
+        </div>
+      </div>`;
+  }
+
+  async function cargarArticulos(zona) {
+    const grid = document.getElementById(`grid-${zona}`);
+    const empty = document.getElementById(`empty-${zona}`);
+    try {
+      const arts = await apiFetch(`/articulos/?zona=${zona}`);
+      grid.innerHTML = '';
+      if (!arts.length) { empty.style.display = 'block'; return; }
+      arts.forEach(a => { grid.innerHTML += cardHTML(a); });
+      arts.forEach(a => cargarLikes(a.id));
+    } catch(e) { grid.innerHTML = '<p style="font-family:\'DM Sans\',sans-serif;color:var(--texto-2)">Error al cargar.</p>'; }
+  }
+
+  async function cargarLikes(id) {
+    try {
+      const data = await apiFetch(`/articulos/${id}/likes`);
+      const btn = document.getElementById(`like-${id}`);
+      const cnt = document.getElementById(`likes-count-${id}`);
+      if (cnt) cnt.textContent = data.likes;
+      if (btn && data.liked) btn.classList.add('liked');
+    } catch(e) {}
+  }
+
+  async function toggleLike(id, e) {
+    e.preventDefault(); e.stopPropagation();
+    try {
+      const data = await apiFetch(`/articulos/${id}/like`, { method: 'POST' });
+      const btn = document.getElementById(`like-${id}`);
+      const cnt = document.getElementById(`likes-count-${id}`);
+      if (cnt) cnt.textContent = data.likes;
+      if (btn) { data.liked ? btn.classList.add('liked') : btn.classList.remove('liked'); }
+    } catch(e) {}
+  }
+
+  async function cargarTop() {
+    try {
+      const top = await apiFetch('/articulos/top/semana');
+      const lista = document.getElementById('top-lista');
+      if (!top.length) { document.getElementById('top-semana-section').style.display = 'none'; return; }
+      lista.innerHTML = top.map((a, i) => `
+        <a href="/pages/articulo.html?id=${a.id}" class="top-item">
+          <div class="top-num">${i+1}</div>
+          <div class="top-info">
+            <div class="top-titulo">${a.titulo}</div>
+            <div class="top-autor">Por ${a.autor}</div>
+          </div>
+          <div class="top-likes">❤️ ${a.likes}</div>
+        </a>`).join('');
+    } catch(e) { document.getElementById('top-semana-section').style.display = 'none'; }
+  }
+
+  async function cargarSecciones() {
+    try {
+      const data = await apiFetch('/buscar/secciones');
+      const pills = document.getElementById('secciones-pills');
+      pills.innerHTML = data.secciones.map(s =>
+        `<button class="seccion-pill" onclick="filtrarSeccion('${s}')">${s}</button>`
+      ).join('');
+    } catch(e) {}
+  }
+
+  function filtrarSeccion(seccion) {
+    seccionActiva = seccion;
+    document.querySelectorAll('.seccion-pill').forEach(p => {
+      p.classList.toggle('active', p.textContent === seccion);
+    });
+    document.getElementById('seccion-seleccionada-label').style.display = 'block';
+    document.getElementById('seccion-badge').textContent = seccion;
+    buscar();
+    document.getElementById('buscar').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function limpiarSeccion() {
+    seccionActiva = null;
+    document.querySelectorAll('.seccion-pill').forEach(p => p.classList.remove('active'));
+    document.getElementById('seccion-seleccionada-label').style.display = 'none';
+    buscar();
+  }
+
+  function buscarDebounce() {
+    clearTimeout(buscarTimer);
+    buscarTimer = setTimeout(buscar, 400);
+  }
+
+  async function buscar() {
+    const q = document.getElementById('search-q').value.trim();
+    const autor = document.getElementById('search-autor').value.trim();
+    const zona = document.getElementById('search-zona').value;
+    const orden = document.getElementById('search-orden').value;
+    const hayFiltros = q || autor || zona || seccionActiva;
+
+    const resultados = document.getElementById('resultados-busqueda');
+
+    if (!hayFiltros) { resultados.style.display = 'none'; return; }
+
+    resultados.style.display = 'block';
+    const grid = document.getElementById('grid-resultados');
+    const empty = document.getElementById('empty-resultados');
+    grid.innerHTML = '<div class="spinner"></div>';
+    empty.style.display = 'none';
+
+    let url = `/buscar/articulos?orden=${orden}`;
+    if (q) url += `&q=${encodeURIComponent(q)}`;
+    if (autor) url += `&autor=${encodeURIComponent(autor)}`;
+    if (zona) url += `&zona=${zona}`;
+    if (seccionActiva) url += `&seccion=${encodeURIComponent(seccionActiva)}`;
+
+    try {
+      const arts = await apiFetch(url);
+      grid.innerHTML = '';
+      document.getElementById('resultados-info').textContent = `${arts.length} resultado${arts.length !== 1 ? 's' : ''} encontrado${arts.length !== 1 ? 's' : ''}`;
+      if (!arts.length) { empty.style.display = 'block'; return; }
+      arts.forEach(a => { grid.innerHTML += cardHTML(a); });
+      arts.forEach(a => cargarLikes(a.id));
+    } catch(e) { grid.innerHTML = '<p>Error al buscar.</p>'; }
+  }
+
+  // Auth manejado por js/auth-modal.js
+
+  cargarTop();
+  cargarSecciones();
+  cargarArticulos('academico');
+  cargarArticulos('libre');
+
+  async function enviarContacto() {
+    const errEl = document.getElementById('cont-error');
+    errEl.style.display = 'none';
+    const nombre = document.getElementById('cont-nombre').value.trim();
+    const email = document.getElementById('cont-email').value.trim();
+    const asunto = document.getElementById('cont-asunto').value.trim();
+    const mensaje = document.getElementById('cont-mensaje').value.trim();
+    if (!nombre || !email || !asunto || !mensaje) {
+      errEl.textContent = 'Por favor llena todos los campos obligatorios';
+      errEl.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('btn-contacto');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('nombre', nombre);
+    fd.append('email', email);
+    fd.append('asunto', asunto);
+    fd.append('mensaje', mensaje);
+    const img = document.getElementById('cont-imagen').files[0];
+    if (img) fd.append('imagen', img);
+    const u = getUsuario();
+    try {
+      const token = getToken();
+      const headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(API + '/contacto/', { method: 'POST', headers, body: fd });
+      if (!res.ok) throw new Error('Error al enviar');
+      document.getElementById('cont-nombre').value = '';
+      document.getElementById('cont-email').value = '';
+      document.getElementById('cont-asunto').value = '';
+      document.getElementById('cont-mensaje').value = '';
+      document.getElementById('cont-imagen').value = '';
+      toast('Mensaje enviado. Te responderemos pronto.', 'success');
+    } catch(e) {
+      errEl.textContent = 'Error al enviar. Intenta de nuevo.';
+      errEl.style.display = 'block';
+    }
+    btn.textContent = 'Enviar mensaje';
+    btn.disabled = false;
+  }
+</script>
+</body>
+</html>

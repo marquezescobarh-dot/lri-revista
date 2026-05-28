@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking — LRI</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .ranking-hero { background: linear-gradient(135deg, #003580 0%, #C9963A 100%); padding: 4rem 2rem 3rem; text-align: center; }
+    .ranking-item { display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.5rem; background: var(--blanco); border: 1.5px solid var(--borde); border-radius: 14px; margin-bottom: 0.8rem; transition: all 0.2s; text-decoration: none; color: inherit; }
+    .ranking-item:hover { transform: translateY(-2px); box-shadow: var(--sombra-md); border-color: var(--azul); }
+    .ranking-item.top-1 { border: 2px solid var(--oro); background: linear-gradient(135deg, #fff 0%, #FDF8F0 100%); }
+    .ranking-item.top-2 { border: 2px solid #C0C0C0; }
+    .ranking-item.top-3 { border: 2px solid #CD7F32; }
+    .posicion { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; min-width: 40px; text-align: center; }
+    .pos-1 { color: var(--oro); }
+    .pos-2 { color: #9E9E9E; }
+    .pos-3 { color: #CD7F32; }
+    .pos-otro { color: var(--texto-3); font-size: 1.2rem; }
+    .rank-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--azul); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; font-weight: 700; overflow: hidden; flex-shrink: 0; }
+    .rank-info { flex: 1; }
+    .rank-nombre { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: var(--texto); }
+    .rank-nivel { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--texto-2); margin-top: 0.2rem; }
+    .rank-pts { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--azul); }
+    .rank-pts-lbl { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--texto-3); }
+    .nivel-card { background: var(--blanco); border: 1.5px solid var(--borde); border-radius: 12px; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; }
+    .nivel-card.alcanzado { border-color: var(--verde); background: var(--verde-claro); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/index.html" class="navbar-brand">
+      <span class="brand-siglas">LRI</span>
+      <span class="brand-nombre">Facultad de Economía · UNAM</span>
+    </a>
+    <div class="navbar-links"><a href="/index.html" class="nav-link">← Inicio</a></div>
+    <div class="navbar-user" id="nav-user"></div>
+  </div>
+</nav>
+
+<div class="ranking-hero">
+  <p style="font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:0.8rem">Comunidad LRI</p>
+  <h1 style="color:#fff;margin-bottom:0.5rem">🏆 Ranking de la comunidad</h1>
+  <p style="font-family:'DM Sans',sans-serif;font-size:0.95rem;color:rgba(255,255,255,0.65)">Los autores más activos y reconocidos de La Riqueza de las Ideas.</p>
+</div>
+
+<div style="max-width:800px;margin:0 auto;padding:3rem 2rem">
+
+  <!-- Tabla de niveles -->
+  <div style="margin-bottom:3rem">
+    <h2 style="margin-bottom:1.5rem;font-size:1.4rem">Sistema de niveles</h2>
+    <div style="display:flex;flex-direction:column;gap:0.6rem" id="niveles-lista"></div>
+  </div>
+
+  <!-- Ranking -->
+  <div>
+    <h2 style="margin-bottom:1.5rem;font-size:1.4rem">Top autores</h2>
+    <div id="ranking-lista"><div class="spinner"></div></div>
+    <div class="empty-state" id="ranking-empty" style="display:none">
+      <div class="empty-icon">🏆</div>
+      <h3>Sé el primero en el ranking</h3>
+      <p>Publica artículos, recibe likes y gana puntos.</p>
+      <a href="/pages/publicar.html" class="btn btn-primary" style="margin-top:1.5rem">Publicar artículo</a>
+    </div>
+  </div>
+
+  <!-- Tu posición -->
+  <div id="mi-posicion" style="display:none;margin-top:2rem;background:var(--azul-claro);border:1.5px solid var(--azul);border-radius:14px;padding:1.5rem">
+    <h4 style="font-family:'DM Sans',sans-serif;color:var(--azul);margin-bottom:0.8rem">Tu posición</h4>
+    <div id="mi-posicion-info"></div>
+    <a href="/pages/perfil.html" class="btn btn-ghost btn-sm" style="margin-top:1rem">Ver mi perfil completo</a>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/auth-modal.js"></script>
+<script>
+  renderNavbar();
+
+  async function cargarRanking() {
+    try {
+      const [ranking, nivelesData] = await Promise.all([
+        apiFetch('/perfil/ranking'),
+        apiFetch('/perfil/niveles')
+      ]);
+
+      // Renderizar niveles
+      const u = getUsuario();
+      const listaEl = document.getElementById('niveles-lista');
+      listaEl.innerHTML = nivelesData.niveles.map(n => {
+        const alcanzado = u && (u.nivel || 1) >= n.nivel;
+        return `<div class="nivel-card ${alcanzado ? 'alcanzado' : ''}">
+          <span style="font-size:1.5rem">${n.emoji}</span>
+          <div style="flex:1">
+            <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.9rem">${n.titulo}</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--texto-3)">Desde ${n.puntos_min} puntos</div>
+          </div>
+          ${alcanzado ? '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.75rem;color:var(--verde);font-weight:700">✓ Alcanzado</span>' : ''}
+        </div>`;
+      }).join('');
+
+      // Renderizar ranking
+      const lista = document.getElementById('ranking-lista');
+      if (!ranking.length) { document.getElementById('ranking-empty').style.display = 'block'; lista.style.display = 'none'; return; }
+
+      lista.innerHTML = ranking.map(r => {
+        const posClass = r.posicion <= 3 ? `top-${r.posicion}` : '';
+        const posNumClass = r.posicion === 1 ? 'pos-1' : r.posicion === 2 ? 'pos-2' : r.posicion === 3 ? 'pos-3' : 'pos-otro';
+        const medallla = r.posicion === 1 ? '🥇' : r.posicion === 2 ? '🥈' : r.posicion === 3 ? '🥉' : r.posicion;
+        const avatarContent = r.foto_perfil
+          ? `<img src="http://localhost:8000/uploads/avatars/${r.foto_perfil}" style="width:52px;height:52px;border-radius:50%;object-fit:cover">`
+          : r.nombre[0].toUpperCase();
+        return `
+          <a href="/pages/perfil.html?id=${r.id}" class="ranking-item ${posClass}">
+            <div class="posicion ${posNumClass}">${medallla}</div>
+            <div class="rank-avatar">${avatarContent}</div>
+            <div class="rank-info">
+              <div class="rank-nombre">${r.nombre}</div>
+              <div class="rank-nivel">${r.nivel_titulo}${r.universidad ? ` · ${r.universidad}` : ''}${r.carrera ? ` · ${r.carrera}` : ''}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="rank-pts">${r.puntos}</div>
+              <div class="rank-pts-lbl">puntos</div>
+            </div>
+          </a>`;
+      }).join('');
+
+      // Mi posición si estoy logueado
+      if (estaLogueado()) {
+        const yo = getUsuario();
+        const miRank = ranking.find(r => r.id === yo.id);
+        if (miRank) {
+          document.getElementById('mi-posicion').style.display = 'block';
+          document.getElementById('mi-posicion-info').innerHTML = `
+            <div style="font-family:'DM Sans',sans-serif">
+              Estás en la posición <strong style="color:var(--azul);font-size:1.2rem">#${miRank.posicion}</strong> con <strong>${miRank.puntos} puntos</strong> — ${miRank.nivel_titulo}
+            </div>`;
+        } else {
+          document.getElementById('mi-posicion').style.display = 'block';
+          document.getElementById('mi-posicion-info').innerHTML = `<p style="font-family:'DM Sans',sans-serif;color:var(--texto-2);font-size:0.88rem">Aún no apareces en el top 10. ¡Publica artículos para ganar puntos y subir!</p>`;
+        }
+      }
+    } catch(e) { document.getElementById('ranking-lista').innerHTML = '<p>Error al cargar.</p>'; }
+  }
+
+  cargarRanking();
+</script>
+</body>
+</html>
