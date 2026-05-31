@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+const API = 'https://lri-revista.onrender.com';
 
 function getToken() { return localStorage.getItem('lri_token'); }
 function getUsuario() { const u = localStorage.getItem('lri_usuario'); return u ? JSON.parse(u) : null; }
